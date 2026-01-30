@@ -1,0 +1,10 @@
+# Core dependencies
+# (none required initially - using standard library)
+
+# Optional dependencies for enhanced functionality
+# pandas>=1.5.0  # For data analysis and export
+# numpy>=1.24.0  # For statistical analysis
+# matplotlib>=3.6.0  # For visualization
+
+# Development dependencies
+# pytest>=7.2.0  # For testing
