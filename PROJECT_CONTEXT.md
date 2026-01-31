@@ -1,6 +1,6 @@
 # Blackjack Simulator - Project Context
 
-**Last Updated:** 2026-01-29
+**Last Updated:** 2026-01-30
 **Project Status:** Stage 1 - Foundation & Documentation (IN PROGRESS)
 **Repository:** Private GitHub repository (alhamood/blackjack-simulator-26)
 
@@ -17,6 +17,7 @@ A Python-based blackjack simulator designed to test various playing strategies a
 3. **Statistical Analysis**: Track and report win/loss/push rates, expected value, and other metrics
 4. **Flexible Deck Configurations**: Support 1-6 physical decks or infinite deck simulation
 5. **Results Export**: Output results in formats suitable for analysis (CSV, JSON)
+6. **Web Interface**: Provide simple web UI for running simulations without writing code
 
 ### Key Requirements
 
@@ -50,6 +51,12 @@ blackjack-simulator-26/
 │   ├── game.py              # Single hand game logic
 │   ├── simulator.py         # Multi-hand simulation engine
 │   └── reporter.py          # Results analysis and export
+├── web/                      # Web interface (Stage 5)
+│   ├── api.py               # FastAPI server
+│   └── static/
+│       ├── index.html       # Single-page web UI
+│       ├── styles.css       # Simple styling
+│       └── app.js           # Vanilla JavaScript frontend
 ├── tests/
 │   └── test_*.py            # Unit tests
 └── results/
@@ -75,6 +82,22 @@ blackjack-simulator-26/
 - Deck/Shoe: Collection of cards with shuffling logic
 - Hand: Cards + evaluation (hard total, soft total, pair detection)
 - Strategy: Lookup table mapping (player_hand, dealer_upcard) → action
+
+**Web Interface Architecture (Stage 5):**
+- **Backend**: FastAPI server (Python) exposing simulation as REST API
+- **Frontend**: Static HTML/CSS/JavaScript (vanilla JS or Alpine.js for simplicity)
+- **Separation**: Core simulation logic (`src/`) stays pure Python with no web dependencies
+- **API Design**:
+  - `GET /api/defaults` - Returns default game parameters from config files
+  - `POST /api/simulate` - Accepts parameters, runs simulation, returns results
+  - `GET /api/results/{id}` - Retrieves cached simulation results (optional)
+- **Frontend Flow**:
+  1. Load page → fetch defaults → populate selectors
+  2. User adjusts parameters (dropdowns, sliders)
+  3. Click "Run Simulation" → POST to API
+  4. Display loading state
+  5. Show results (win rate, expected value, statistics)
+- **Deployment**: Can run locally or deploy (Render, Railway, Vercel for frontend + backend)
 
 ---
 
@@ -169,6 +192,28 @@ blackjack-simulator-26/
 - Add summary statistics
 - Optionally: Add Google Sheets integration
 
+### Stage 5: Web Interface (PLANNED)
+**Goal**: Build simple web UI for running simulations
+
+**Tasks:**
+- Create FastAPI server (web/api.py)
+  - Endpoint to fetch default parameters
+  - Endpoint to run simulation with custom parameters
+  - Endpoint to retrieve results
+- Build static frontend (web/static/)
+  - HTML structure with parameter selectors
+  - CSS for simple, clean styling
+  - JavaScript for API calls and UI updates
+- Test web interface locally
+- (Optional) Deploy to hosting platform
+- Add web interface documentation to README
+
+**Technical Notes:**
+- Keep frontend simple: ~100 lines HTML, ~50 lines JS, ~30 lines CSS
+- Use vanilla JavaScript or Alpine.js (no heavy frameworks)
+- Core simulation code (`src/`) remains web-agnostic
+- FastAPI chosen for modern Python, auto-generated API docs, ease of use
+
 ---
 
 ## Development Environment
@@ -202,6 +247,10 @@ blackjack-simulator-26/
 
 6. **Unit Tests Lightweight**: Focus tests on critical logic (hand evaluation, strategy lookup, game rules). Don't over-test for a personal project.
 
+7. **Web Interface Architecture**: Chose FastAPI + static frontend over Streamlit for clean separation of concerns. Core simulation logic (`src/`) stays pure Python with no web framework dependencies. Frontend uses vanilla JavaScript for simplicity and minimal dependencies.
+
+8. **No Heavy Frontend Frameworks**: Avoiding React, Vue, etc. to keep code simple and minimal. Vanilla JS or Alpine.js is sufficient for the straightforward UI needs.
+
 ---
 
 ## Questions & Clarifications
@@ -212,11 +261,16 @@ blackjack-simulator-26/
 - Q: GitHub username? → A: alhamood
 - Q: HTTPS or SSH? → A: HTTPS
 
+### Answered (2026-01-30)
+- Q: Web interface approach? → A: FastAPI + static frontend (vanilla JS)
+- Q: Keep simulation logic separate from web code? → A: Yes, `src/` stays pure Python
+
 ### Open Questions
 - File structure granularity: Keep as-is or consolidate modules?
 - Export format preference: CSV sufficient or add other formats?
 - Google Sheets integration: Priority or defer to later?
 - Testing depth: How comprehensive should unit tests be?
+- Web deployment platform: Run locally or deploy to Render/Railway/Vercel?
 
 ---
 

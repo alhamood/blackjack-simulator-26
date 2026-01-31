@@ -10,6 +10,7 @@ This simulator allows you to:
 - Simulate with 1-6 physical decks or infinite deck
 - Track and analyze win/loss/push rates and expected value
 - Export results for further analysis
+- Run simulations via command line or web interface (planned)
 
 ## Project Status
 
@@ -24,6 +25,7 @@ This simulator allows you to:
 - Implement core game logic (cards, hands, dealer)
 - Add strategy execution
 - Build simulation engine
+- Create web interface (future)
 
 ## Installation
 
@@ -71,6 +73,12 @@ blackjack-simulator-26/
 │   ├── game.py              # Single hand game logic
 │   ├── simulator.py         # Multi-hand simulation engine
 │   └── reporter.py          # Results analysis and export
+├── web/                      # Web interface (planned)
+│   ├── api.py               # FastAPI server
+│   └── static/
+│       ├── index.html       # Web UI
+│       ├── styles.css       # Styling
+│       └── app.js           # Frontend logic
 ├── tests/                    # Unit tests
 └── results/                  # Simulation output files
 ```
@@ -117,6 +125,25 @@ rules = GameRules(
 
 sim = Simulator(num_decks=6, rules=rules, strategy=BasicStrategy())
 ```
+
+### Web Interface (Planned)
+
+A simple web interface will be available for running simulations:
+
+1. Open the web interface in your browser
+2. Configure game parameters using dropdowns and sliders (pre-populated with defaults)
+3. Click "Run Simulation" to execute
+4. View results including win rate, expected value, and detailed statistics
+
+**Architecture:**
+- **Backend**: FastAPI server (`web/api.py`) exposing simulation endpoints
+- **Frontend**: Static HTML/CSS/JavaScript (`web/static/`) for simple, interactive UI
+- **API Endpoints**:
+  - `GET /api/defaults` - Fetch default game parameters
+  - `POST /api/simulate` - Run simulation with custom parameters
+  - `GET /api/results/{id}` - Retrieve simulation results
+
+The web interface keeps the core simulation logic (`src/`) pure Python with no web dependencies.
 
 ## Game Rules & Variations
 
@@ -176,9 +203,17 @@ Private project - all rights reserved.
 
 alhamood - 2026
 
+## Roadmap
+
+- **Stage 1**: Foundation & Documentation ✓
+- **Stage 2**: Core Game Logic (cards, hands, dealer)
+- **Stage 3**: Strategy & Simulation (strategy execution, simulation engine)
+- **Stage 4**: Results & Analysis (reporting, export)
+- **Stage 5**: Web Interface (FastAPI backend, static frontend)
+
 ## Version History
 
 - **v0.1 (In Progress)** - Stage 1: Foundation & Documentation
   - Project structure created
-  - Documentation initialized
+  - Documentation initialized (including web interface plan)
   - Git repository configured
