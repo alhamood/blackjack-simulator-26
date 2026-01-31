@@ -1,13 +1,13 @@
 {
-  "name": "Basic Strategy (H17, Surrender)",
-  "description": "Mathematically optimal basic strategy for 4+ deck blackjack",
+  "name": "Basic Strategy (S17, Surrender)",
+  "description": "Mathematically optimal basic strategy for 4+ deck blackjack, dealer stands on soft 17",
   "rules": {
     "decks": "4+",
-    "dealer_hits_soft_17": true,
+    "dealer_hits_soft_17": false,
     "surrender_allowed": true,
     "double_after_split": true,
     "blackjack_payout": 1.5,
-    "notes": "Based on Wizard of Odds strategy calculator"
+    "notes": "Based on Wizard of Odds strategy for 4+ decks"
   },
   "strategy": {
     "hard_totals": {
@@ -16,14 +16,14 @@
       "7": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
       "8": {"2": "hit", "3": "hit", "4": "hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
       "9": {"2": "hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
-      "10": {"2": "double_else_hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "double_else_hit", "8": "double_else_hit", "9": "double_else_hit", "10": "double_else_hit", "A": "double_else_hit"},
-      "11": {"2": "double_else_hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "double_else_hit", "8": "double_else_hit", "9": "double_else_hit", "10": "double_else_hit", "A": "double_else_hit"},
+      "10": {"2": "double_else_hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "double_else_hit", "8": "double_else_hit", "9": "double_else_hit", "10": "hit", "A": "hit"},
+      "11": {"2": "double_else_hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "double_else_hit", "8": "double_else_hit", "9": "double_else_hit", "10": "double_else_hit", "A": "hit"},
       "12": {"2": "hit", "3": "hit", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
-      "13": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "surrender_else_hit"},
-      "14": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "surrender_else_hit"},
-      "15": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "surrender_else_hit"},
-      "16": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "surrender_else_hit"},
-      "17": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "surrender_else_stand"},
+      "13": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "hit"},
+      "14": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "hit"},
+      "15": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "hit", "10": "surrender_else_hit", "A": "hit"},
+      "16": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "hit", "8": "hit", "9": "surrender_else_hit", "10": "surrender_else_hit", "A": "surrender_else_hit"},
+      "17": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "18": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "19": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "20": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
@@ -34,9 +34,9 @@
       "14": {"2": "hit", "3": "hit", "4": "hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
       "15": {"2": "hit", "3": "hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
       "16": {"2": "hit", "3": "hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
-      "17": {"2": "hit", "3": "hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
-      "18": {"2": "double_else_stand", "3": "double_else_stand", "4": "double_else_stand", "5": "double_else_stand", "6": "double_else_stand", "7": "stand", "8": "stand", "9": "hit", "10": "hit", "A": "hit"},
-      "19": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "double_else_stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "17": {"2": "hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "18": {"2": "stand", "3": "double_else_stand", "4": "double_else_stand", "5": "double_else_stand", "6": "double_else_stand", "7": "stand", "8": "stand", "9": "hit", "10": "hit", "A": "hit"},
+      "19": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "20": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "21": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"}
     },
@@ -47,7 +47,7 @@
       "5": {"2": "double_else_hit", "3": "double_else_hit", "4": "double_else_hit", "5": "double_else_hit", "6": "double_else_hit", "7": "double_else_hit", "8": "double_else_hit", "9": "double_else_hit", "10": "hit", "A": "hit"},
       "6": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
       "7": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "split", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
-      "8": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "split", "8": "split", "9": "split", "10": "surrender_else_split", "A": "surrender_else_split"},
+      "8": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "split", "8": "split", "9": "split", "10": "surrender_else_split", "A": "split"},
       "9": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "stand", "8": "split", "9": "split", "10": "stand", "A": "stand"},
       "10": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
       "A": {"2": "split", "3": "split", "4": "split", "5": "split", "6": "split", "7": "split", "8": "split", "9": "split", "10": "split", "A": "split"}
@@ -63,7 +63,6 @@
     "split_else_hit": "Split if allowed (DAS), otherwise hit",
     "surrender": "Forfeit hand and lose half bet (if not allowed, use fallback)",
     "surrender_else_hit": "Surrender if allowed, otherwise hit",
-    "surrender_else_split": "Surrender if allowed, otherwise split",
-    "surrender_else_stand": "Surrender if allowed, otherwise stand"
+    "surrender_else_split": "Surrender if allowed, otherwise split"
   }
 }
