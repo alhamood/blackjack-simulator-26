@@ -8,6 +8,7 @@ import os
 import json
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+from collections import defaultdict
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -142,58 +143,58 @@ def create_strategy_wrapper(strategy: Strategy) -> callable:
     return strategy_func
 
 
-def categorize_hands_by_strategy(sessions: List) -> Dict[str, List[Dict[str, Any]]]:
+def categorize_hands_by_strategy(sessions_data: List[Dict]) -> Dict[str, List[Dict[str, Any]]]:
     """Categorize hand results by strategy situation for debugging.
 
     Returns a dictionary mapping strategy keys (e.g., "hard_10_vs_A") to lists of hand examples.
     """
-    from collections import defaultdict
-
     categories = defaultdict(list)
 
-    for session in sessions:
-        if not hasattr(session, 'hand_results') or not session.hand_results:
+    for session in sessions_data:
+        if 'hands' not in session or not session['hands']:
             continue
 
-        for hand in session.hand_results:
-            # Get dealer upcard (first card)
-            dealer_upcard = hand.dealer_hand.cards[0].rank
+        for hand in session['hands']:
+            # Skip if missing dealer upcard
+            if hand.get('dealer_upcard') is None:
+                continue
+
+            # Get dealer upcard
+            dealer_upcard = hand['dealer_upcard']
             dealer_upcard_str = 'A' if dealer_upcard == 1 else str(dealer_upcard)
 
-            # Categorize player hand
-            player_hand = hand.player_hand
-            player_value = player_hand.value()
+            # Get player hand info
+            player_value = hand['player_value']
+            player_soft = hand['player_soft']
+            player_pair = hand['player_pair']
+            player_blackjack = hand['player_blackjack']
 
-            # Determine hand type
-            if player_hand.is_blackjack():
-                hand_type = "blackjack"
+            # Determine hand type and create key
+            if player_blackjack:
                 key = f"blackjack_vs_{dealer_upcard_str}"
-            elif player_hand.is_pair() and len(player_hand.cards) == 2:
-                card_rank = player_hand.cards[0].rank
-                card_str = 'A' if card_rank == 1 else str(card_rank)
-                hand_type = "pair"
+            elif player_pair and len(hand.get('player_cards', [])) == 2:
+                # Get the rank of the paired card
+                card_str = hand['player_cards'][0][:hand['player_cards'][0].find(hand['player_cards'][0][-1])]
+                if card_str == '1':  # Ace
+                    card_str = 'A'
                 key = f"pair_{card_str}_vs_{dealer_upcard_str}"
-            elif player_hand.is_soft() and not player_hand.is_busted():
-                hand_type = "soft"
+            elif player_soft:
                 key = f"soft_{player_value}_vs_{dealer_upcard_str}"
             else:
-                hand_type = "hard"
                 key = f"hard_{player_value}_vs_{dealer_upcard_str}"
 
-            # Store hand example
-            hand_data = {
-                'player_cards': [f"{c.rank}{c.suit[0]}" for c in player_hand.cards],
+            # Store hand example (already in correct format)
+            categories[key].append({
+                'player_cards': hand.get('player_cards', []),
                 'player_value': player_value,
-                'player_soft': player_hand.is_soft(),
-                'player_pair': player_hand.is_pair(),
+                'player_soft': player_soft,
+                'player_pair': player_pair,
                 'dealer_upcard': dealer_upcard_str,
-                'dealer_value': hand.dealer_hand.value(),
-                'outcome': hand.outcome.name,
-                'bet': round(hand.bet, 2),
-                'payout': round(hand.payout, 2)
-            }
-
-            categories[key].append(hand_data)
+                'dealer_value': hand['dealer_value'],
+                'outcome': hand['outcome'],
+                'bet': hand['bet'],
+                'payout': hand['payout']
+            })
 
     # Convert defaultdict to regular dict and limit examples per category
     return {k: v[:5] for k, v in sorted(categories.items())}  # Keep first 5 examples per category
@@ -408,13 +409,16 @@ async def run_simulation(request: SimulationRequest):
             }
 
             # Include hand data if tracked
-            if request.simulation.track_hands and session.hand_results:
+            if (request.simulation.track_hands or request.simulation.debug_mode) and session.hand_results:
                 session_data['hands'] = [
                     {
                         'outcome': hand.outcome.name,
+                        'player_cards': [f"{c.rank}{c.suit[0]}" for c in hand.player_hand.cards],
                         'player_value': hand.player_hand.value(),
                         'player_soft': hand.player_hand.is_soft(),
+                        'player_pair': hand.player_hand.is_pair(),
                         'player_blackjack': hand.player_hand.is_blackjack(),
+                        'dealer_upcard': hand.dealer_hand.cards[0].rank if hand.dealer_hand.cards else None,
                         'dealer_value': hand.dealer_hand.value(),
                         'dealer_soft': hand.dealer_hand.is_soft(),
                         'dealer_blackjack': hand.dealer_hand.is_blackjack(),
@@ -436,8 +440,8 @@ async def run_simulation(request: SimulationRequest):
         # Add debug information if debug mode enabled
         if request.simulation.debug_mode:
             data['debug'] = {
-                'strategy_examples': categorize_hands_by_strategy(result.sessions),
-                'total_tracked_hands': sum(len(s.hand_results) if hasattr(s, 'hand_results') and s.hand_results else 0 for s in result.sessions)
+                'strategy_examples': categorize_hands_by_strategy(data['sessions']),
+                'total_tracked_hands': sum(len(s.get('hands', [])) for s in data['sessions'])
             }
 
         return data
