@@ -228,26 +228,62 @@ blackjack-simulator-26/
 - JSON export designed for Stage 5 web API consumption
 
 ### Stage 5: Web Interface (PLANNED)
-**Goal**: Build simple web UI for running simulations
+**Status**: PLANNED
+**Goal**: Build comprehensive web UI with custom strategy editor
 
-**Tasks:**
-- Create FastAPI server (web/api.py)
-  - Endpoint to fetch default parameters
-  - Endpoint to run simulation with custom parameters
-  - Endpoint to retrieve results
-- Build static frontend (web/static/)
-  - HTML structure with parameter selectors
-  - CSS for simple, clean styling
-  - JavaScript for API calls and UI updates
-- Test web interface locally
-- (Optional) Deploy to hosting platform
-- Add web interface documentation to README
+**Architecture:**
+- **Backend**: FastAPI with 5 endpoints
+  - `GET /api/defaults` - Return default parameters and available strategies
+  - `POST /api/simulate` - Run simulation (supports custom strategy JSON)
+  - `GET /api/strategies` - List available strategies with metadata
+  - `GET /api/strategies/{id}` - Get full strategy JSON for editing
+  - `GET /` - Serve static files
+- **Frontend**: Two pages + shared assets
+  - `index.html` - Main simulation page with all parameters
+  - `strategy-editor.html` - Visual strategy builder
+  - `app.js` - Simulation logic (~250 lines)
+  - `strategy-editor.js` - Editor logic (~300 lines)
+  - `styles.css` - Shared styling (~120 lines)
+
+**Key Features:**
+- Comprehensive parameter control (all game rules, shoe config, simulation options)
+- Chart.js visualization (win/loss/push pie chart)
+- Download results as JSON or CSV
+- **Custom strategy editor** with visual table builder:
+  - Three tables: Hard totals, Soft totals, Pairs
+  - Dropdowns for each cell (hit, stand, double, split, surrender, fallbacks)
+  - Load existing strategies for editing
+  - Save as JSON or use in simulation (localStorage)
+- Cloud deployment ready (Railway/Render)
+
+**Implementation Phases:**
+1. Backend Setup - FastAPI server with all endpoints, Pydantic validation
+2. Frontend Structure - Main page HTML with configuration form
+3. Frontend Logic - Interactive UI, API integration, Chart.js
+4. Strategy Editor - Visual strategy builder page
+5. Deployment Configuration - Procfile, environment variables
+6. Testing & Polish - API tests, cross-browser testing, documentation
+
+**Files to Create:**
+- `web/api.py` (~250 lines)
+- `web/static/index.html` (~150 lines)
+- `web/static/strategy-editor.html` (~200 lines)
+- `web/static/styles.css` (~120 lines)
+- `web/static/app.js` (~250 lines)
+- `web/static/strategy-editor.js` (~300 lines)
+- `web/Procfile` (deployment config)
+- `tests/test_api.py` (~120 lines)
 
 **Technical Notes:**
-- Keep frontend simple: ~100 lines HTML, ~50 lines JS, ~30 lines CSS
-- Use vanilla JavaScript or Alpine.js (no heavy frameworks)
-- Core simulation code (`src/`) remains web-agnostic
-- FastAPI chosen for modern Python, auto-generated API docs, ease of use
+- Total scope: ~1200 lines of code
+- Reuse existing `export_to_json()` format from reporter.py
+- Strategy wrapper function pattern from demo_simulator.py
+- Chart.js loaded from CDN (no npm)
+- Custom strategies stored in localStorage or downloaded as JSON
+- API auto-documentation at /docs (FastAPI feature)
+- Timeout protection: 30s max per simulation
+
+**Detailed Plan:** See `/Users/alberthamood/.claude/plans/moonlit-wobbling-leaf.md` for complete implementation plan with API specs, validation rules, and verification steps
 
 ---
 
