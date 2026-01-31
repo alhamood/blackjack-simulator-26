@@ -31,6 +31,7 @@ class SessionResult:
         bust_count: Number of player busts
         surrender_count: Number of surrenders
         double_count: Number of doubles
+        hand_results: Optional list of individual hand results (for sampling/export)
     """
     hands_played: int = 0
     total_payout: float = 0.0
@@ -41,6 +42,7 @@ class SessionResult:
     bust_count: int = 0
     surrender_count: int = 0
     double_count: int = 0
+    hand_results: List[GameResult] = field(default_factory=list)
 
     @property
     def ev_per_hand(self) -> float:
@@ -185,7 +187,9 @@ class Simulator:
         self,
         num_hands: int,
         strategy_func: Callable[[Hand, Card], PlayerAction],
-        shoe: Optional[Shoe] = None
+        shoe: Optional[Shoe] = None,
+        track_hands: bool = False,
+        max_tracked_hands: int = 100
     ) -> SessionResult:
         """
         Run a single session of blackjack.
@@ -194,6 +198,8 @@ class Simulator:
             num_hands: Number of hands to play
             strategy_func: Strategy function (player_hand, dealer_upcard) -> PlayerAction
             shoe: Optional shoe to use (creates new one if None)
+            track_hands: If True, store individual hand results for export
+            max_tracked_hands: Maximum number of hands to track (default 100)
 
         Returns:
             SessionResult with statistics
@@ -237,13 +243,19 @@ class Simulator:
             if result.bet == 2.0:
                 session.double_count += 1
 
+            # Store hand result if tracking is enabled
+            if track_hands and len(session.hand_results) < max_tracked_hands:
+                session.hand_results.append(result)
+
         return session
 
     def run_simulation(
         self,
         total_hands: int,
         strategy_func: Callable[[Hand, Card], PlayerAction],
-        num_sessions: int = 1
+        num_sessions: int = 1,
+        track_hands: bool = False,
+        max_tracked_hands: int = 100
     ) -> SimulationResult:
         """
         Run a complete simulation.
@@ -257,6 +269,8 @@ class Simulator:
             total_hands: Total number of hands to play across all sessions
             strategy_func: Strategy function
             num_sessions: Number of sessions (1 for single long session)
+            track_hands: If True, store sample of individual hand results for export
+            max_tracked_hands: Maximum number of hands to track (default 100)
 
         Returns:
             SimulationResult with complete statistics
@@ -265,14 +279,24 @@ class Simulator:
 
         if num_sessions == 1:
             # Single session mode - one long session
-            session = self.run_session(total_hands, strategy_func)
+            session = self.run_session(
+                total_hands,
+                strategy_func,
+                track_hands=track_hands,
+                max_tracked_hands=max_tracked_hands
+            )
             result.sessions = [session]
         else:
             # Multi-session mode - divide hands across sessions
             hands_per_session = total_hands // num_sessions
 
             for _ in range(num_sessions):
-                session = self.run_session(hands_per_session, strategy_func)
+                session = self.run_session(
+                    hands_per_session,
+                    strategy_func,
+                    track_hands=track_hands,
+                    max_tracked_hands=max_tracked_hands
+                )
                 result.sessions.append(session)
 
         # Aggregate results from all sessions

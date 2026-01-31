@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 3 - Strategy & Simulation ✓ COMPLETE
+**Current Stage:** Stage 4 - Results & Analysis ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -28,11 +28,14 @@ This simulator allows you to:
   - Strategy comparison framework
   - Single-session and multi-session simulation engine
   - Variance analysis across sessions
-  - 115 passing tests across all modules
+- ✓ Stage 4: Results & Analysis
+  - CSV export for summary, sessions, and hand samples
+  - JSON export for web API consumption
+  - Optional hand tracking (default: first 100 hands)
+  - 127 passing tests across all modules
 
 **Next Steps:**
-- Stage 4: Advanced Analysis (card counting, detailed reporting)
-- Stage 5: Create web interface
+- Stage 5: Web Interface (FastAPI backend + static frontend)
 
 ## Installation
 
@@ -215,12 +218,20 @@ alhamood - 2026
 - **Stage 1**: Foundation & Documentation ✓
 - **Stage 2**: Core Game Logic (cards, hands, dealer) ✓
 - **Stage 3**: Strategy & Simulation (strategy execution, simulation engine) ✓
-- **Stage 4**: Advanced Analysis (card counting, detailed reporting)
+- **Stage 4**: Results & Analysis (CSV/JSON export, hand tracking) ✓
 - **Stage 5**: Web Interface (FastAPI backend, static frontend)
 
 ## Version History
 
-- **v0.3 (Current)** - Stage 3: Strategy & Simulation - COMPLETE
+- **v0.4 (Current)** - Stage 4: Results & Analysis - COMPLETE
+  - Results export system (reporter.py)
+  - CSV export: summary, sessions, and hand samples
+  - JSON export for web API consumption
+  - Optional hand tracking with configurable sampling
+  - 127 passing unit tests (12 new tests for reporter)
+  - Demo script showing all export functionality
+
+- **v0.3** - Stage 3: Strategy & Simulation - COMPLETE
   - JSON-based strategy system with full basic strategy
   - Strategy comparison framework (basic vs never-bust vs always-stand)
   - Single and multi-session simulation engine
