@@ -167,8 +167,12 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
   - Strategy selection (built-in strategies or custom)
 - **Results Display**:
   - Summary statistics (EV, win rate, total payout)
-  - Visual pie chart showing win/loss/push distribution
-  - Detailed breakdown of all outcomes
+  - Two interactive pie charts:
+    - Hand-level outcomes (blackjacks, doubles, regular wins/losses, surrenders, pushes)
+    - Session-level outcomes (winning vs losing vs break-even sessions)
+  - Hierarchical breakdown table with payout analysis
+    - Shows wins/losses/pushes with indented sub-categories
+    - Displays count, percentage, and total payout in units for each outcome type
   - Download results as JSON or CSV
 - **Strategy Editor**: Create and edit custom strategies
   - Visual table builder for defining strategies
@@ -259,7 +263,12 @@ alhamood - 2026
 - **v0.5 (Current)** - Stage 5: Web Interface - COMPLETE
   - FastAPI backend with 5 REST endpoints (defaults, simulate, strategies list/detail)
   - Interactive web UI with comprehensive parameter control
-  - Chart.js visualization (pie chart for win/loss/push distribution)
+  - Dual Chart.js visualizations:
+    - Hand-level outcome distribution (7 categories: blackjacks, double wins/losses, regular wins/losses, surrenders, pushes)
+    - Session-level outcome distribution (winning/losing/break-even sessions for variance analysis)
+  - Hierarchical breakdown table with payout calculations
+    - Indented sub-categories showing composition of wins/losses/pushes
+    - Per-category payout totals in betting units
   - Visual strategy editor for creating and editing custom strategies
   - Download results as JSON or CSV
   - Custom strategy support (localStorage + JSON import/export)

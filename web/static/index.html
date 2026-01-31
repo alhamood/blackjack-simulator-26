@@ -83,17 +83,22 @@
                         <h3>Simulation</h3>
                         <div class="form-row">
                             <label for="total_hands">
-                                Total hands:
+                                Hands per session:
                                 <input type="number" id="total_hands" name="total_hands"
-                                       value="10000" min="100" max="1000000" step="1000" class="number-input">
+                                       value="100" min="100" max="1000000" step="1" class="number-input">
                             </label>
                         </div>
                         <div class="form-row">
                             <label for="num_sessions">
                                 Number of sessions:
                                 <input type="number" id="num_sessions" name="num_sessions"
-                                       value="1" min="1" max="1000" class="number-input">
+                                       value="1000" min="1" max="10000" step="1" class="number-input">
                             </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="info-text">
+                                Total hands: <span id="total-hands-display">100,000</span>
+                            </div>
                         </div>
                         <div class="form-row">
                             <label for="strategy">
@@ -130,7 +135,7 @@
                 <!-- Summary Stats -->
                 <div class="summary-grid">
                     <div class="stat-card">
-                        <div class="stat-label">Expected Value</div>
+                        <div class="stat-label">Estimated EV</div>
                         <div id="ev-value" class="stat-value">-</div>
                         <div class="stat-sublabel">Per Hand</div>
                     </div>
@@ -151,9 +156,16 @@
                     </div>
                 </div>
 
-                <!-- Chart -->
-                <div class="chart-container">
-                    <canvas id="outcomeChart"></canvas>
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Hand Outcomes</h3>
+                        <canvas id="handOutcomeChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Session Outcomes</h3>
+                        <canvas id="sessionOutcomeChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Detailed Stats -->
@@ -165,6 +177,7 @@
                                 <th>Outcome</th>
                                 <th>Count</th>
                                 <th>Percentage</th>
+                                <th>Total Payout</th>
                             </tr>
                         </thead>
                         <tbody id="stats-tbody">

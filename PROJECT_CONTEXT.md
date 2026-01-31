@@ -238,24 +238,27 @@ blackjack-simulator-26/
   - GET /api/strategies - List all available strategies
   - GET /api/strategies/{id} - Get full strategy JSON for editing
   - Static file serving for frontend
-- ✓ web/static/index.html: Main simulation page (172 lines)
+- ✓ web/static/index.html: Main simulation page (203 lines)
   - Comprehensive configuration form (game rules, shoe, simulation)
-  - Results display with summary stats and detailed breakdown
+  - Results display with summary stats and dual chart visualization
+  - Hierarchical breakdown table with payout analysis
   - Loading spinner and error handling
   - Download buttons for JSON/CSV export
 - ✓ web/static/strategy-editor.html: Visual strategy builder (167 lines)
   - Strategy metadata (name, description)
   - Three strategy tables (hard totals, soft totals, pairs)
   - Load existing strategies, reset, save, use in simulation
-- ✓ web/static/styles.css: Responsive styling (355 lines)
-  - Clean layout with CSS Grid/Flexbox
+- ✓ web/static/styles.css: Responsive styling (421 lines)
+  - Clean layout with CSS Grid/Flexbox for dual charts
   - Color-coded stat cards (positive/negative EV)
+  - Hierarchical table styling with indentation
   - Mobile-responsive design
   - Loading animations and error message styling
-- ✓ web/static/app.js: Main page logic (348 lines)
+- ✓ web/static/app.js: Main page logic (565 lines)
   - Load defaults from API
   - Form submission and validation
-  - Results rendering with Chart.js pie chart
+  - Dual Chart.js visualizations (hand outcomes + session outcomes)
+  - Hierarchical results table with payout calculations
   - Download as JSON/CSV
   - Custom strategy support from localStorage
 - ✓ web/static/strategy-editor.js: Strategy editor logic (334 lines)
@@ -289,7 +292,10 @@ blackjack-simulator-26/
 
 **Key Features:**
 - Comprehensive parameter control (all game rules, shoe config, simulation options)
-- Chart.js visualization (win/loss/push pie chart)
+- Dual Chart.js visualizations:
+  - Hand-level outcome distribution (blackjacks, double wins/losses, regular wins/losses, surrenders, pushes)
+  - Session-level outcome distribution (winning/losing/break-even sessions)
+- Hierarchical breakdown table with payout analysis by outcome category
 - Download results as JSON or CSV
 - **Custom strategy editor** with visual table builder:
   - Three tables: Hard totals, Soft totals, Pairs

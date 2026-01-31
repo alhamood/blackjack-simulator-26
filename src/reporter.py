@@ -271,8 +271,10 @@ def export_to_json(result: SimulationResult, filepath: str, include_hands: bool 
                     'outcome': hand.outcome.name,
                     'player_value': hand.player_hand.value(),
                     'player_soft': hand.player_hand.is_soft(),
+                    'player_blackjack': hand.player_hand.is_blackjack(),
                     'dealer_value': hand.dealer_hand.value(),
                     'dealer_soft': hand.dealer_hand.is_soft(),
+                    'dealer_blackjack': hand.dealer_hand.is_blackjack(),
                     'bet': round(hand.bet, 2),
                     'payout': round(hand.payout, 2)
                 }

@@ -55,12 +55,28 @@ class CustomStrategyRequest(BaseModel):
 
 
 class SimulationConfig(BaseModel):
-    """Simulation configuration."""
-    total_hands: int = Field(default=10000, ge=100, le=1000000)
-    num_sessions: int = Field(default=1, ge=1, le=1000)
+    """Simulation configuration.
+
+    Note: total_hands represents hands PER SESSION.
+    Actual total = total_hands × num_sessions.
+    """
+    total_hands: int = Field(default=100, ge=100, le=1000000, description="Hands per session")
+    num_sessions: int = Field(default=1000, ge=1, le=10000, description="Number of sessions")
     strategy: str = "basic_strategy_h17"
     track_hands: bool = False
     custom_strategy: Optional[CustomStrategyRequest] = None
+
+    @field_validator('num_sessions')
+    @classmethod
+    def validate_total_hands_limit(cls, v, info):
+        """Ensure total hands (hands_per_session × num_sessions) doesn't exceed 10M."""
+        hands_per_session = info.data.get('total_hands')
+        if hands_per_session and (hands_per_session * v) > 10000000:
+            raise ValueError(
+                f'Total hands ({hands_per_session:,} × {v:,} = {hands_per_session * v:,}) '
+                f'exceeds limit of 10,000,000'
+            )
+        return v
 
 
 class SimulationRequest(BaseModel):
@@ -199,8 +215,8 @@ async def get_defaults():
             "infinite_shoe": False
         },
         "simulation": {
-            "total_hands": 10000,
-            "num_sessions": 1,
+            "total_hands": 100,
+            "num_sessions": 1000,
             "track_hands": False
         },
         "available_strategies": available_strategies
@@ -277,10 +293,16 @@ async def run_simulation(request: SimulationRequest):
             strategy_func = create_strategy_wrapper(strategy)
 
         # Run simulation
+        # Note: total_hands represents hands PER SESSION
+        # Multiply by num_sessions to get actual total hands for the simulator
+        hands_per_session = request.simulation.total_hands
+        num_sessions = request.simulation.num_sessions
+        actual_total_hands = hands_per_session * num_sessions
+
         result = sim.run_simulation(
-            request.simulation.total_hands,
+            actual_total_hands,
             strategy_func,
-            num_sessions=request.simulation.num_sessions,
+            num_sessions=num_sessions,
             track_hands=request.simulation.track_hands,
             max_tracked_hands=100 if request.simulation.track_hands else 0
         )
@@ -330,8 +352,10 @@ async def run_simulation(request: SimulationRequest):
                         'outcome': hand.outcome.name,
                         'player_value': hand.player_hand.value(),
                         'player_soft': hand.player_hand.is_soft(),
+                        'player_blackjack': hand.player_hand.is_blackjack(),
                         'dealer_value': hand.dealer_hand.value(),
                         'dealer_soft': hand.dealer_hand.is_soft(),
+                        'dealer_blackjack': hand.dealer_hand.is_blackjack(),
                         'bet': round(hand.bet, 2),
                         'payout': round(hand.payout, 2)
                     }

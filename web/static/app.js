@@ -1,6 +1,7 @@
 // Global variables
 let currentResults = null;
-let outcomeChart = null;
+let handOutcomeChart = null;
+let sessionOutcomeChart = null;
 
 // Initialize page on load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,6 +87,10 @@ function setupEventListeners() {
         }
     });
 
+    // Total hands calculation (hands per session × sessions)
+    document.getElementById('total_hands').addEventListener('input', updateTotalHandsDisplay);
+    document.getElementById('num_sessions').addEventListener('input', updateTotalHandsDisplay);
+
     // Download buttons
     document.getElementById('download-json').addEventListener('click', downloadJSON);
     document.getElementById('download-csv').addEventListener('click', downloadCSV);
@@ -101,6 +106,15 @@ function updatePayoutLabel(value) {
     } else {
         label.textContent = `${value}:1`;
     }
+}
+
+// Update total hands display (hands per session × sessions)
+function updateTotalHandsDisplay() {
+    const handsPerSession = parseInt(document.getElementById('total_hands').value) || 0;
+    const numSessions = parseInt(document.getElementById('num_sessions').value) || 0;
+    const totalHands = handsPerSession * numSessions;
+
+    document.getElementById('total-hands-display').textContent = formatNumber(totalHands);
 }
 
 // Check for custom strategy in localStorage
@@ -129,9 +143,9 @@ async function handleSubmit(e) {
         // Build request payload
         const payload = buildRequestPayload();
 
-        // Validate payload
+        // Validate payload (error message already shown by validatePayload)
         if (!validatePayload(payload)) {
-            throw new Error('Invalid configuration');
+            return; // Don't throw - error already displayed
         }
 
         // Send request to API
@@ -182,7 +196,7 @@ function buildRequestPayload() {
             total_hands: parseInt(document.getElementById('total_hands').value),
             num_sessions: parseInt(document.getElementById('num_sessions').value),
             strategy: document.getElementById('strategy').value,
-            track_hands: false
+            track_hands: true  // Enable for chart visualization
         }
     };
 
@@ -202,14 +216,25 @@ function buildRequestPayload() {
 
 // Validate payload
 function validatePayload(payload) {
-    if (payload.simulation.total_hands < 100 || payload.simulation.total_hands > 1000000) {
-        showError('Total hands must be between 100 and 1,000,000');
+    const handsPerSession = payload.simulation.total_hands;
+    const numSessions = payload.simulation.num_sessions;
+    const actualTotalHands = handsPerSession * numSessions;
+
+    if (handsPerSession < 100 || handsPerSession > 1000000) {
+        showError('Hands per session must be between 100 and 1,000,000');
         return false;
     }
-    if (payload.simulation.num_sessions < 1 || payload.simulation.num_sessions > 1000) {
-        showError('Number of sessions must be between 1 and 1,000');
+    if (numSessions < 1 || numSessions > 10000) {
+        showError('Number of sessions must be between 1 and 10,000');
         return false;
     }
+
+    // Reasonable limit on total computation (10 million total hands)
+    if (actualTotalHands > 10000000) {
+        showError(`Total hands (${formatNumber(actualTotalHands)}) exceeds limit of 10,000,000. Reduce hands per session or number of sessions.`);
+        return false;
+    }
+
     return true;
 }
 
@@ -232,8 +257,9 @@ function displayResults(results) {
         evCard.classList.add('negative');
     }
 
-    // Create chart
-    createOutcomeChart(summary);
+    // Create charts
+    createHandOutcomeChart(results);
+    createSessionOutcomeChart(results);
 
     // Update detailed stats table
     updateStatsTable(summary);
@@ -242,25 +268,32 @@ function displayResults(results) {
     showResults();
 }
 
-// Create pie chart for outcomes
-function createOutcomeChart(summary) {
-    const ctx = document.getElementById('outcomeChart');
+// Create hand-level outcome chart
+function createHandOutcomeChart(results) {
+    const ctx = document.getElementById('handOutcomeChart');
 
     // Destroy existing chart if any
-    if (outcomeChart) {
-        outcomeChart.destroy();
+    if (handOutcomeChart) {
+        handOutcomeChart.destroy();
     }
 
-    outcomeChart = new Chart(ctx, {
+    // Analyze hand results to categorize outcomes
+    const categories = analyzeHandOutcomes(results);
+
+    handOutcomeChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Wins', 'Losses', 'Pushes'],
+            labels: categories.labels,
             datasets: [{
-                data: [summary.win_count, summary.loss_count, summary.push_count],
+                data: categories.data,
                 backgroundColor: [
-                    '#27ae60',  // Green for wins
-                    '#e74c3c',  // Red for losses
-                    '#95a5a6'   // Gray for pushes
+                    '#f39c12',  // Orange for blackjacks
+                    '#27ae60',  // Green for double wins
+                    '#c0392b',  // Dark red for double losses
+                    '#2ecc71',  // Light green for regular wins
+                    '#e74c3c',  // Red for regular losses
+                    '#95a5a6',  // Gray for surrenders
+                    '#7f8c8d'   // Dark gray for pushes
                 ],
                 borderWidth: 2,
                 borderColor: '#fff'
@@ -268,20 +301,121 @@ function createOutcomeChart(summary) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: true,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Outcome Distribution',
-                    font: {
-                        size: 16
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 11 }
                     }
-                },
+                }
+            }
+        }
+    });
+}
+
+// Create session-level outcome chart
+function createSessionOutcomeChart(results) {
+    const ctx = document.getElementById('sessionOutcomeChart');
+
+    // Destroy existing chart if any
+    if (sessionOutcomeChart) {
+        sessionOutcomeChart.destroy();
+    }
+
+    // Count winning/losing/breakeven sessions
+    const sessionCategories = analyzeSessionOutcomes(results);
+
+    sessionOutcomeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: sessionCategories.labels,
+            datasets: [{
+                data: sessionCategories.data,
+                backgroundColor: [
+                    '#27ae60',  // Green for winning sessions
+                    '#e74c3c',  // Red for losing sessions
+                    '#3498db'   // Blue for break-even sessions
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
                 legend: {
                     position: 'bottom'
                 }
             }
         }
     });
+}
+
+// Analyze hand outcomes from results (uses summary stats from ALL sessions)
+function analyzeHandOutcomes(results) {
+    const summary = results.summary;
+
+    // Estimate breakdown from summary statistics
+    // Note: Doubles overlap with wins/losses, so we estimate the split
+    const estimatedDoubleWins = Math.round(summary.double_count * summary.win_rate);
+    const estimatedDoubleLosses = summary.double_count - estimatedDoubleWins;
+
+    const regularWins = summary.win_count - summary.blackjack_count - estimatedDoubleWins;
+    const regularLosses = summary.loss_count - summary.surrender_count - estimatedDoubleLosses;
+
+    return {
+        labels: ['Blackjacks', 'Double Wins', 'Double Losses', 'Regular Wins', 'Regular Losses', 'Surrenders', 'Pushes'],
+        data: [
+            summary.blackjack_count,
+            estimatedDoubleWins,
+            estimatedDoubleLosses,
+            Math.max(0, regularWins), // Ensure non-negative
+            Math.max(0, regularLosses),
+            summary.surrender_count,
+            summary.push_count
+        ]
+    };
+}
+
+// Analyze session outcomes
+function analyzeSessionOutcomes(results) {
+    if (!results.sessions || results.sessions.length === 0) {
+        return { labels: [], data: [] };
+    }
+
+    let winners = 0;
+    let losers = 0;
+    let breakeven = 0;
+
+    results.sessions.forEach(session => {
+        if (session.total_payout > 0) {
+            winners++;
+        } else if (session.total_payout < 0) {
+            losers++;
+        } else {
+            breakeven++;
+        }
+    });
+
+    const labels = [];
+    const data = [];
+
+    if (winners > 0) {
+        labels.push(`Winning (${winners})`);
+        data.push(winners);
+    }
+    if (losers > 0) {
+        labels.push(`Losing (${losers})`);
+        data.push(losers);
+    }
+    if (breakeven > 0) {
+        labels.push(`Break-even (${breakeven})`);
+        data.push(breakeven);
+    }
+
+    return { labels, data };
 }
 
 // Update detailed stats table
@@ -291,24 +425,48 @@ function updateStatsTable(summary) {
 
     const totalHands = summary.total_hands;
 
+    // Estimate double breakdown based on win/loss rates among decided hands
+    const decidedHands = summary.win_count + summary.loss_count;
+    const winRateDecided = decidedHands > 0 ? summary.win_count / decidedHands : 0;
+    const lossRateDecided = decidedHands > 0 ? summary.loss_count / decidedHands : 0;
+
+    const estimatedDoubleWins = Math.round(summary.double_count * winRateDecided);
+    const estimatedDoubleLosses = Math.round(summary.double_count * lossRateDecided);
+    const estimatedDoublePushes = summary.double_count - estimatedDoubleWins - estimatedDoubleLosses;
+
+    // Calculate regular (non-special) outcomes
+    const regularWins = summary.win_count - summary.blackjack_count - estimatedDoubleWins;
+    const regularLosses = summary.loss_count - summary.bust_count - summary.surrender_count - estimatedDoubleLosses;
+    const regularPushes = summary.push_count - estimatedDoublePushes;
+
+    // Build hierarchical stats with payout calculations
     const stats = [
-        { label: 'Wins', count: summary.win_count },
-        { label: 'Losses', count: summary.loss_count },
-        { label: 'Pushes', count: summary.push_count },
-        { label: 'Blackjacks', count: summary.blackjack_count },
-        { label: 'Busts', count: summary.bust_count },
-        { label: 'Surrenders', count: summary.surrender_count },
-        { label: 'Doubles', count: summary.double_count }
+        { label: 'Wins', count: summary.win_count, payout: summary.blackjack_count * 1.5 + estimatedDoubleWins * 2 + regularWins * 1, indent: false },
+        { label: 'Blackjacks', count: summary.blackjack_count, payout: summary.blackjack_count * 1.5, indent: true },
+        { label: 'Double Wins', count: estimatedDoubleWins, payout: estimatedDoubleWins * 2, indent: true },
+        { label: 'Regular Wins', count: Math.max(0, regularWins), payout: Math.max(0, regularWins) * 1, indent: true },
+
+        { label: 'Losses', count: summary.loss_count, payout: -(summary.bust_count + regularLosses + estimatedDoubleLosses * 2 + summary.surrender_count * 0.5), indent: false },
+        { label: 'Busts', count: summary.bust_count, payout: -summary.bust_count, indent: true },
+        { label: 'Surrenders', count: summary.surrender_count, payout: -summary.surrender_count * 0.5, indent: true },
+        { label: 'Double Losses', count: estimatedDoubleLosses, payout: -estimatedDoubleLosses * 2, indent: true },
+        { label: 'Regular Losses', count: Math.max(0, regularLosses), payout: -Math.max(0, regularLosses), indent: true },
+
+        { label: 'Pushes', count: summary.push_count, payout: 0, indent: false },
+        { label: 'Double Pushes', count: Math.max(0, estimatedDoublePushes), payout: 0, indent: true },
+        { label: 'Regular Pushes', count: Math.max(0, regularPushes), payout: 0, indent: true }
     ];
 
     stats.forEach(stat => {
         const row = document.createElement('tr');
         const percentage = ((stat.count / totalHands) * 100).toFixed(2);
+        const indentClass = stat.indent ? 'class="indent"' : '';
 
         row.innerHTML = `
-            <td>${stat.label}</td>
+            <td ${indentClass}>${stat.label}</td>
             <td>${stat.count.toLocaleString()}</td>
             <td>${percentage}%</td>
+            <td>${stat.payout >= 0 ? '+' : ''}${stat.payout.toFixed(2)}</td>
         `;
 
         tbody.appendChild(row);
@@ -400,4 +558,8 @@ function setFormDisabled(disabled) {
             input.disabled = disabled;
         }
     });
+}
+
+function formatNumber(num) {
+    return num.toLocaleString();
 }
