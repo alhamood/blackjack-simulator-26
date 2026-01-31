@@ -20,7 +20,7 @@ def parse_csv_strategy(csv_path):
         'Rh': 'surrender_else_hit',
         'Rs': 'surrender_else_stand',
         'Rp': 'surrender_else_split',
-        'Ph': 'split_else_hit'
+        'Ph': 'split'  # Simplified: treat as split (ignoring DAS condition)
     }
 
     # Dealer upcards in order from CSV

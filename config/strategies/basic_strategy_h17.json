@@ -340,8 +340,8 @@
     },
     "pairs": {
       "2": {
-        "2": "split_else_hit",
-        "3": "split_else_hit",
+        "2": "split",
+        "3": "split",
         "4": "split",
         "5": "split",
         "6": "split",
@@ -352,8 +352,8 @@
         "A": "hit"
       },
       "3": {
-        "2": "split_else_hit",
-        "3": "split_else_hit",
+        "2": "split",
+        "3": "split",
         "4": "split",
         "5": "split",
         "6": "split",
@@ -367,8 +367,8 @@
         "2": "hit",
         "3": "hit",
         "4": "hit",
-        "5": "split_else_hit",
-        "6": "split_else_hit",
+        "5": "split",
+        "6": "split",
         "7": "hit",
         "8": "hit",
         "9": "hit",
@@ -376,7 +376,7 @@
         "A": "hit"
       },
       "6": {
-        "2": "split_else_hit",
+        "2": "split",
         "3": "split",
         "4": "split",
         "5": "split",
