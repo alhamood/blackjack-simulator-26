@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Simulator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Blackjack Simulator</h1>
+            <p class="subtitle">Test blackjack strategies with configurable game conditions</p>
+        </header>
+
+        <main>
+            <!-- Configuration Form -->
+            <section class="config-section">
+                <h2>Configuration</h2>
+
+                <form id="simulation-form">
+                    <!-- Game Rules -->
+                    <div class="config-group">
+                        <h3>Game Rules</h3>
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="dealer_hits_soft_17" name="dealer_hits_soft_17">
+                                Dealer hits soft 17
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="surrender_allowed" name="surrender_allowed" checked>
+                                Surrender allowed
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="double_after_split" name="double_after_split" checked>
+                                Double after split
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label for="blackjack_payout">
+                                Blackjack payout:
+                                <input type="number" id="blackjack_payout" name="blackjack_payout"
+                                       value="1.5" min="1.0" max="2.0" step="0.1" class="payout-input">
+                                <span id="payout-label" class="payout-label">3:2</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Shoe Configuration -->
+                    <div class="config-group">
+                        <h3>Shoe Configuration</h3>
+                        <div class="form-row">
+                            <label for="num_decks">
+                                Number of decks:
+                                <input type="range" id="num_decks" name="num_decks"
+                                       min="1" max="8" value="6" class="slider">
+                                <span id="num-decks-value" class="slider-value">6</span>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label for="penetration">
+                                Penetration:
+                                <input type="range" id="penetration" name="penetration"
+                                       min="0.1" max="1.0" step="0.05" value="0.75" class="slider">
+                                <span id="penetration-value" class="slider-value">75%</span>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="infinite_shoe" name="infinite_shoe">
+                                Infinite shoe (CSM - Continuous Shuffle Machine)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Simulation Configuration -->
+                    <div class="config-group">
+                        <h3>Simulation</h3>
+                        <div class="form-row">
+                            <label for="total_hands">
+                                Total hands:
+                                <input type="number" id="total_hands" name="total_hands"
+                                       value="10000" min="100" max="1000000" step="1000" class="number-input">
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label for="num_sessions">
+                                Number of sessions:
+                                <input type="number" id="num_sessions" name="num_sessions"
+                                       value="1" min="1" max="1000" class="number-input">
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <label for="strategy">
+                                Strategy:
+                                <select id="strategy" name="strategy" class="strategy-select">
+                                    <option value="basic_strategy_h17">Loading...</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <a href="/strategy-editor.html" class="editor-link">Create/Edit Custom Strategy →</a>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="run-button" class="btn btn-primary">Run Simulation</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Running simulation...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error" class="error-message hidden"></div>
+
+            <!-- Results Section -->
+            <section id="results" class="results-section hidden">
+                <h2>Results</h2>
+
+                <!-- Summary Stats -->
+                <div class="summary-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Expected Value</div>
+                        <div id="ev-value" class="stat-value">-</div>
+                        <div class="stat-sublabel">Per Hand</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div id="win-rate" class="stat-value">-</div>
+                        <div class="stat-sublabel">Percentage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Payout</div>
+                        <div id="total-payout" class="stat-value">-</div>
+                        <div class="stat-sublabel">Units</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Hands</div>
+                        <div id="total-hands" class="stat-value">-</div>
+                        <div class="stat-sublabel">Played</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <canvas id="outcomeChart"></canvas>
+                </div>
+
+                <!-- Detailed Stats -->
+                <div class="detailed-stats">
+                    <h3>Detailed Breakdown</h3>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Outcome</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stats-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Download Buttons -->
+                <div class="download-actions">
+                    <button id="download-json" class="btn btn-secondary">Download JSON</button>
+                    <button id="download-csv" class="btn btn-secondary">Download CSV</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Blackjack Simulator v0.5 | <a href="https://github.com/alhamood/blackjack-simulator-26">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 4 - Results & Analysis ✓ COMPLETE
+**Current Stage:** Stage 5 - Web Interface ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -33,9 +33,14 @@ This simulator allows you to:
   - JSON export for web API consumption
   - Optional hand tracking (default: first 100 hands)
   - 127 passing tests across all modules
-
-**Next Steps:**
-- Stage 5: Web Interface (FastAPI backend + static frontend)
+- ✓ Stage 5: Web Interface
+  - FastAPI backend with 5 REST endpoints
+  - Interactive web UI with comprehensive parameter control
+  - Chart.js visualization for outcome distribution
+  - Visual strategy editor for creating custom strategies
+  - Download results as JSON or CSV
+  - Deployment-ready with Procfile
+  - 12 API endpoint tests
 
 ## Installation
 
@@ -136,24 +141,52 @@ rules = GameRules(
 sim = Simulator(num_decks=6, rules=rules, strategy=BasicStrategy())
 ```
 
-### Web Interface (Planned)
+### Web Interface
 
-A simple web interface will be available for running simulations:
+The simulator includes a comprehensive web interface for running simulations without writing code.
 
-1. Open the web interface in your browser
-2. Configure game parameters using dropdowns and sliders (pre-populated with defaults)
-3. Click "Run Simulation" to execute
-4. View results including win rate, expected value, and detailed statistics
+**Starting the Web Server:**
+```bash
+# Install web dependencies if not already installed
+pip install -r requirements.txt
+
+# Start the server
+python web/api.py
+
+# Or use uvicorn directly
+uvicorn web.api:app --reload
+```
+
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+**Features:**
+- **Configuration Form**: Control all simulation parameters
+  - Game rules (dealer hits soft 17, surrender, double after split, blackjack payout)
+  - Shoe configuration (deck count, penetration, infinite shoe mode)
+  - Simulation settings (number of hands, number of sessions)
+  - Strategy selection (built-in strategies or custom)
+- **Results Display**:
+  - Summary statistics (EV, win rate, total payout)
+  - Visual pie chart showing win/loss/push distribution
+  - Detailed breakdown of all outcomes
+  - Download results as JSON or CSV
+- **Strategy Editor**: Create and edit custom strategies
+  - Visual table builder for defining strategies
+  - Load existing strategies for modification
+  - Save custom strategies as JSON files
+  - Use custom strategies directly in simulations
+
+**API Endpoints:**
+- `GET /api/defaults` - Get default game parameters and available strategies
+- `POST /api/simulate` - Run simulation with custom parameters (supports custom strategies)
+- `GET /api/strategies` - List all available strategies
+- `GET /api/strategies/{id}` - Get full strategy JSON for editing
+- `GET /docs` - Interactive API documentation (Swagger UI)
 
 **Architecture:**
-- **Backend**: FastAPI server (`web/api.py`) exposing simulation endpoints
-- **Frontend**: Static HTML/CSS/JavaScript (`web/static/`) for simple, interactive UI
-- **API Endpoints**:
-  - `GET /api/defaults` - Fetch default game parameters
-  - `POST /api/simulate` - Run simulation with custom parameters
-  - `GET /api/results/{id}` - Retrieve simulation results
-
-The web interface keeps the core simulation logic (`src/`) pure Python with no web dependencies.
+- **Backend**: FastAPI server ([web/api.py](web/api.py))
+- **Frontend**: Static HTML/CSS/JavaScript ([web/static/](web/static/))
+- Core simulation logic ([src/](src/)) remains pure Python with no web dependencies
 
 ## Game Rules & Variations
 
@@ -219,11 +252,22 @@ alhamood - 2026
 - **Stage 2**: Core Game Logic (cards, hands, dealer) ✓
 - **Stage 3**: Strategy & Simulation (strategy execution, simulation engine) ✓
 - **Stage 4**: Results & Analysis (CSV/JSON export, hand tracking) ✓
-- **Stage 5**: Web Interface (FastAPI backend, static frontend)
+- **Stage 5**: Web Interface (FastAPI backend, static frontend) ✓
 
 ## Version History
 
-- **v0.4 (Current)** - Stage 4: Results & Analysis - COMPLETE
+- **v0.5 (Current)** - Stage 5: Web Interface - COMPLETE
+  - FastAPI backend with 5 REST endpoints (defaults, simulate, strategies list/detail)
+  - Interactive web UI with comprehensive parameter control
+  - Chart.js visualization (pie chart for win/loss/push distribution)
+  - Visual strategy editor for creating and editing custom strategies
+  - Download results as JSON or CSV
+  - Custom strategy support (localStorage + JSON import/export)
+  - Deployment-ready (Procfile for Railway/Render)
+  - 12 new API endpoint tests (139 total tests)
+  - Full API documentation at /docs (FastAPI auto-generated)
+
+- **v0.4** - Stage 4: Results & Analysis - COMPLETE
   - Results export system (reporter.py)
   - CSV export: summary, sessions, and hand samples
   - JSON export for web API consumption
