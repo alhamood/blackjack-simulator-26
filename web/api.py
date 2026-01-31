@@ -204,7 +204,7 @@ async def get_defaults():
 
     return {
         "game_rules": {
-            "dealer_hits_soft_17": False,
+            "dealer_hits_soft_17": True,
             "surrender_allowed": True,
             "double_after_split": True,
             "blackjack_payout": 1.5
