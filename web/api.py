@@ -64,6 +64,7 @@ class SimulationConfig(BaseModel):
     num_sessions: int = Field(default=1000, ge=1, le=10000, description="Number of sessions")
     strategy: str = "basic_strategy_h17"
     track_hands: bool = False
+    debug_mode: bool = False
     custom_strategy: Optional[CustomStrategyRequest] = None
 
     @field_validator('num_sessions')
@@ -139,6 +140,63 @@ def create_strategy_wrapper(strategy: Strategy) -> callable:
         )
 
     return strategy_func
+
+
+def categorize_hands_by_strategy(sessions: List) -> Dict[str, List[Dict[str, Any]]]:
+    """Categorize hand results by strategy situation for debugging.
+
+    Returns a dictionary mapping strategy keys (e.g., "hard_10_vs_A") to lists of hand examples.
+    """
+    from collections import defaultdict
+
+    categories = defaultdict(list)
+
+    for session in sessions:
+        if not hasattr(session, 'hand_results') or not session.hand_results:
+            continue
+
+        for hand in session.hand_results:
+            # Get dealer upcard (first card)
+            dealer_upcard = hand.dealer_hand.cards[0].rank
+            dealer_upcard_str = 'A' if dealer_upcard == 1 else str(dealer_upcard)
+
+            # Categorize player hand
+            player_hand = hand.player_hand
+            player_value = player_hand.value()
+
+            # Determine hand type
+            if player_hand.is_blackjack():
+                hand_type = "blackjack"
+                key = f"blackjack_vs_{dealer_upcard_str}"
+            elif player_hand.is_pair() and len(player_hand.cards) == 2:
+                card_rank = player_hand.cards[0].rank
+                card_str = 'A' if card_rank == 1 else str(card_rank)
+                hand_type = "pair"
+                key = f"pair_{card_str}_vs_{dealer_upcard_str}"
+            elif player_hand.is_soft() and not player_hand.is_busted():
+                hand_type = "soft"
+                key = f"soft_{player_value}_vs_{dealer_upcard_str}"
+            else:
+                hand_type = "hard"
+                key = f"hard_{player_value}_vs_{dealer_upcard_str}"
+
+            # Store hand example
+            hand_data = {
+                'player_cards': [f"{c.rank}{c.suit[0]}" for c in player_hand.cards],
+                'player_value': player_value,
+                'player_soft': player_hand.is_soft(),
+                'player_pair': player_hand.is_pair(),
+                'dealer_upcard': dealer_upcard_str,
+                'dealer_value': hand.dealer_hand.value(),
+                'outcome': hand.outcome.name,
+                'bet': round(hand.bet, 2),
+                'payout': round(hand.payout, 2)
+            }
+
+            categories[key].append(hand_data)
+
+    # Convert defaultdict to regular dict and limit examples per category
+    return {k: v[:5] for k, v in sorted(categories.items())}  # Keep first 5 examples per category
 
 
 def create_custom_strategy_wrapper(strategy_data: CustomStrategyData) -> callable:
@@ -299,12 +357,16 @@ async def run_simulation(request: SimulationRequest):
         num_sessions = request.simulation.num_sessions
         actual_total_hands = hands_per_session * num_sessions
 
+        # Determine tracking parameters
+        track_hands = request.simulation.track_hands or request.simulation.debug_mode
+        max_tracked = 10000 if request.simulation.debug_mode else (100 if request.simulation.track_hands else 0)
+
         result = sim.run_simulation(
             actual_total_hands,
             strategy_func,
             num_sessions=num_sessions,
-            track_hands=request.simulation.track_hands,
-            max_tracked_hands=100 if request.simulation.track_hands else 0
+            track_hands=track_hands,
+            max_tracked_hands=max_tracked
         )
 
         # Convert to JSON format (using reporter module pattern)
@@ -369,6 +431,13 @@ async def run_simulation(request: SimulationRequest):
             data['variance'] = {
                 'session_ev_mean': round(result.session_ev_mean, 6),
                 'session_ev_stdev': round(result.session_ev_stdev, 6)
+            }
+
+        # Add debug information if debug mode enabled
+        if request.simulation.debug_mode:
+            data['debug'] = {
+                'strategy_examples': categorize_hands_by_strategy(result.sessions),
+                'total_tracked_hands': sum(len(s.hand_results) if hasattr(s, 'hand_results') and s.hand_results else 0 for s in result.sessions)
             }
 
         return data

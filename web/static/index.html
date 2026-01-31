@@ -111,6 +111,12 @@
                         <div class="form-row">
                             <a href="/strategy-editor.html" class="editor-link">Create/Edit Custom Strategy →</a>
                         </div>
+                        <div class="form-row">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="debug_mode" name="debug_mode">
+                                Debug mode (track 10K hands for strategy verification)
+                            </label>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -183,6 +189,13 @@
                         <tbody id="stats-tbody">
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Debug Information -->
+                <div id="debug-section" class="debug-section hidden">
+                    <h3>Strategy Verification (Debug Mode)</h3>
+                    <p class="debug-info">Total tracked hands: <span id="debug-tracked-count">0</span></p>
+                    <div id="debug-examples" class="debug-examples"></div>
                 </div>
 
                 <!-- Download Buttons -->

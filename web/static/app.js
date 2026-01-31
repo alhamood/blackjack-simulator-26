@@ -196,7 +196,8 @@ function buildRequestPayload() {
             total_hands: parseInt(document.getElementById('total_hands').value),
             num_sessions: parseInt(document.getElementById('num_sessions').value),
             strategy: document.getElementById('strategy').value,
-            track_hands: true  // Enable for chart visualization
+            track_hands: true,  // Enable for chart visualization
+            debug_mode: document.getElementById('debug_mode').checked
         }
     };
 
@@ -263,6 +264,13 @@ function displayResults(results) {
 
     // Update detailed stats table
     updateStatsTable(summary);
+
+    // Display debug information if available
+    if (results.debug) {
+        displayDebugInfo(results.debug);
+    } else {
+        document.getElementById('debug-section').classList.add('hidden');
+    }
 
     // Show results section
     showResults();
@@ -471,6 +479,62 @@ function updateStatsTable(summary) {
 
         tbody.appendChild(row);
     });
+}
+
+// Display debug information
+function displayDebugInfo(debug) {
+    document.getElementById('debug-section').classList.remove('hidden');
+    document.getElementById('debug-tracked-count').textContent = debug.total_tracked_hands.toLocaleString();
+
+    const examplesDiv = document.getElementById('debug-examples');
+    examplesDiv.innerHTML = '';
+
+    const strategyExamples = debug.strategy_examples;
+    const keys = Object.keys(strategyExamples).sort();
+
+    if (keys.length === 0) {
+        examplesDiv.innerHTML = '<p>No hand examples captured.</p>';
+        return;
+    }
+
+    // Create table for strategy examples
+    const table = document.createElement('table');
+    table.className = 'debug-table';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Situation</th>
+                <th>Count</th>
+                <th>Examples</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+
+    keys.forEach(key => {
+        const examples = strategyExamples[key];
+        const row = document.createElement('tr');
+
+        // Format examples
+        const examplesList = examples.map(ex => {
+            const cards = ex.player_cards.join(' ');
+            const soft = ex.player_soft ? 's' : '';
+            const pair = ex.player_pair ? 'P' : '';
+            return `${cards} (${ex.player_value}${soft}${pair}) vs ${ex.dealer_upcard} → ${ex.outcome} (${ex.payout >= 0 ? '+' : ''}${ex.payout})`;
+        }).join('<br>');
+
+        row.innerHTML = `
+            <td><code>${key}</code></td>
+            <td>${examples.length}</td>
+            <td class="example-cell">${examplesList}</td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    examplesDiv.appendChild(table);
 }
 
 // Download results as JSON
