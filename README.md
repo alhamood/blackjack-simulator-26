@@ -14,18 +14,21 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 1 - Foundation & Documentation
+**Current Stage:** Stage 2 - Core Game Logic ✓ COMPLETE
 
 **Completed:**
-- Project structure created
-- Documentation initialized
-- Repository configured
+- ✓ Stage 1: Foundation & Documentation
+- ✓ Stage 2: Core Game Logic
+  - Card, Deck, and Shoe classes with infinite deck support
+  - Hand evaluation with soft/hard ace logic
+  - Dealer behavior with configurable rules
+  - Complete blackjack game engine
+  - 74 passing tests across all modules
 
 **Next Steps:**
-- Implement core game logic (cards, hands, dealer)
-- Add strategy execution
-- Build simulation engine
-- Create web interface (future)
+- Stage 3: Implement strategy execution (basic strategy from JSON)
+- Stage 4: Build multi-hand simulation engine
+- Stage 5: Create web interface
 
 ## Installation
 
@@ -213,7 +216,15 @@ alhamood - 2026
 
 ## Version History
 
-- **v0.1 (In Progress)** - Stage 1: Foundation & Documentation
+- **v0.2 (Current)** - Stage 2: Core Game Logic - COMPLETE
+  - Complete blackjack game engine
+  - 74 passing unit tests
+  - Support for infinite deck (CSM)
+  - Configurable game rules (H17/S17, surrender, payouts)
+  - Player actions: hit, stand, double, surrender
+  - Demo scripts for all modules
+
+- **v0.1** - Stage 1: Foundation & Documentation - COMPLETE
   - Project structure created
   - Documentation initialized (including web interface plan)
   - Git repository configured
