@@ -1,0 +1,315 @@
+"""
+Blackjack simulation engine for testing strategies.
+
+Classes:
+    SimulationResult: Results from a simulation run
+    SessionResult: Results from a single session
+    Simulator: Runs blackjack simulations with configurable parameters
+"""
+
+from dataclasses import dataclass, field
+from typing import Optional, Callable, List
+import statistics
+from src.cards import Shoe
+from src.game import BlackjackGame, GameRules, GameResult, HandOutcome, PlayerAction
+from src.hand import Hand
+from src.cards import Card
+
+
+@dataclass
+class SessionResult:
+    """
+    Results from a single playing session.
+
+    Attributes:
+        hands_played: Number of hands played in this session
+        total_payout: Net payout for the session
+        win_count: Number of winning hands
+        loss_count: Number of losing hands
+        push_count: Number of pushes
+        blackjack_count: Number of player blackjacks
+        bust_count: Number of player busts
+        surrender_count: Number of surrenders
+        double_count: Number of doubles
+    """
+    hands_played: int = 0
+    total_payout: float = 0.0
+    win_count: int = 0
+    loss_count: int = 0
+    push_count: int = 0
+    blackjack_count: int = 0
+    bust_count: int = 0
+    surrender_count: int = 0
+    double_count: int = 0
+
+    @property
+    def ev_per_hand(self) -> float:
+        """Expected value per hand."""
+        if self.hands_played == 0:
+            return 0.0
+        return self.total_payout / self.hands_played
+
+    @property
+    def win_rate(self) -> float:
+        """Percentage of hands won (excluding pushes)."""
+        total_decided = self.win_count + self.loss_count
+        if total_decided == 0:
+            return 0.0
+        return self.win_count / total_decided
+
+
+@dataclass
+class SimulationResult:
+    """
+    Results from a complete simulation.
+
+    Attributes:
+        total_hands: Total number of hands played
+        total_payout: Total net payout across all hands
+        sessions: List of individual session results (for multi-session sims)
+        win_count: Total wins
+        loss_count: Total losses
+        push_count: Total pushes
+        blackjack_count: Total player blackjacks
+        bust_count: Total player busts
+        surrender_count: Total surrenders
+        double_count: Total doubles
+    """
+    total_hands: int = 0
+    total_payout: float = 0.0
+    sessions: List[SessionResult] = field(default_factory=list)
+    win_count: int = 0
+    loss_count: int = 0
+    push_count: int = 0
+    blackjack_count: int = 0
+    bust_count: int = 0
+    surrender_count: int = 0
+    double_count: int = 0
+
+    @property
+    def ev_per_hand(self) -> float:
+        """Overall expected value per hand."""
+        if self.total_hands == 0:
+            return 0.0
+        return self.total_payout / self.total_hands
+
+    @property
+    def win_rate(self) -> float:
+        """Overall win rate (excluding pushes)."""
+        total_decided = self.win_count + self.loss_count
+        if total_decided == 0:
+            return 0.0
+        return self.win_count / total_decided
+
+    @property
+    def session_ev_mean(self) -> float:
+        """Mean EV across sessions."""
+        if not self.sessions:
+            return self.ev_per_hand
+        return statistics.mean(s.ev_per_hand for s in self.sessions)
+
+    @property
+    def session_ev_stdev(self) -> float:
+        """Standard deviation of EV across sessions."""
+        if len(self.sessions) < 2:
+            return 0.0
+        return statistics.stdev(s.ev_per_hand for s in self.sessions)
+
+    def summary(self) -> str:
+        """
+        Generate a summary string of the simulation results.
+
+        Returns:
+            Formatted summary string
+        """
+        lines = [
+            f"=== Simulation Results ===",
+            f"Total hands: {self.total_hands:,}",
+            f"Total payout: {self.total_payout:+.2f}",
+            f"EV per hand: {self.ev_per_hand:+.6f} ({self.ev_per_hand * 100:+.4f}%)",
+            f"",
+            f"Outcomes:",
+            f"  Wins: {self.win_count:,} ({self.win_count / self.total_hands * 100:.2f}%)",
+            f"  Losses: {self.loss_count:,} ({self.loss_count / self.total_hands * 100:.2f}%)",
+            f"  Pushes: {self.push_count:,} ({self.push_count / self.total_hands * 100:.2f}%)",
+            f"  Win rate: {self.win_rate * 100:.2f}% (excl. pushes)",
+            f"",
+            f"Special outcomes:",
+            f"  Blackjacks: {self.blackjack_count:,}",
+            f"  Busts: {self.bust_count:,}",
+            f"  Surrenders: {self.surrender_count:,}",
+            f"  Doubles: {self.double_count:,}",
+        ]
+
+        if self.sessions:
+            lines.extend([
+                f"",
+                f"Session statistics ({len(self.sessions)} sessions):",
+                f"  Mean EV: {self.session_ev_mean:+.6f}",
+                f"  StdDev: {self.session_ev_stdev:.6f}",
+            ])
+
+        return "\n".join(lines)
+
+
+class Simulator:
+    """
+    Blackjack simulation engine.
+
+    Runs single-session or multi-session simulations to analyze strategy
+    performance across different game conditions.
+    """
+
+    def __init__(
+        self,
+        rules: Optional[GameRules] = None,
+        num_decks: int = 6,
+        penetration: float = 0.75,
+        infinite_shoe: bool = False
+    ):
+        """
+        Initialize the simulator.
+
+        Args:
+            rules: Game rules (uses defaults if None)
+            num_decks: Number of decks in the shoe
+            penetration: Shoe penetration (0.0-1.0, ignored if infinite_shoe=True)
+            infinite_shoe: If True, use infinite shoe (CSM simulation)
+        """
+        self.rules = rules or GameRules()
+        self.num_decks = num_decks
+        self.penetration = penetration
+        self.infinite_shoe = infinite_shoe
+
+    def run_session(
+        self,
+        num_hands: int,
+        strategy_func: Callable[[Hand, Card], PlayerAction],
+        shoe: Optional[Shoe] = None
+    ) -> SessionResult:
+        """
+        Run a single session of blackjack.
+
+        Args:
+            num_hands: Number of hands to play
+            strategy_func: Strategy function (player_hand, dealer_upcard) -> PlayerAction
+            shoe: Optional shoe to use (creates new one if None)
+
+        Returns:
+            SessionResult with statistics
+        """
+        if shoe is None:
+            shoe = Shoe(
+                num_decks=self.num_decks,
+                penetration=self.penetration,
+                infinite=self.infinite_shoe
+            )
+
+        session = SessionResult()
+
+        for _ in range(num_hands):
+            game = BlackjackGame(shoe, rules=self.rules)
+            result = game.play_hand(strategy_func=strategy_func)
+
+            # Update statistics
+            session.hands_played += 1
+            session.total_payout += result.payout
+
+            # Track outcomes
+            if result.payout > 0:
+                session.win_count += 1
+            elif result.payout < 0:
+                session.loss_count += 1
+            else:
+                session.push_count += 1
+
+            # Track special outcomes
+            if result.outcome == HandOutcome.PLAYER_BLACKJACK:
+                session.blackjack_count += 1
+            elif result.outcome == HandOutcome.PLAYER_BUST:
+                session.bust_count += 1
+
+            # Track surrenders (payout is -0.5)
+            if result.payout == -0.5:
+                session.surrender_count += 1
+
+            # Track doubles (bet is 2.0)
+            if result.bet == 2.0:
+                session.double_count += 1
+
+        return session
+
+    def run_simulation(
+        self,
+        total_hands: int,
+        strategy_func: Callable[[Hand, Card], PlayerAction],
+        num_sessions: int = 1
+    ) -> SimulationResult:
+        """
+        Run a complete simulation.
+
+        Two modes:
+        1. Single session (num_sessions=1): Run total_hands in one long session
+        2. Multiple sessions (num_sessions>1): Run num_sessions sessions of
+           (total_hands / num_sessions) hands each
+
+        Args:
+            total_hands: Total number of hands to play across all sessions
+            strategy_func: Strategy function
+            num_sessions: Number of sessions (1 for single long session)
+
+        Returns:
+            SimulationResult with complete statistics
+        """
+        result = SimulationResult()
+
+        if num_sessions == 1:
+            # Single session mode - one long session
+            session = self.run_session(total_hands, strategy_func)
+            result.sessions = [session]
+        else:
+            # Multi-session mode - divide hands across sessions
+            hands_per_session = total_hands // num_sessions
+
+            for _ in range(num_sessions):
+                session = self.run_session(hands_per_session, strategy_func)
+                result.sessions.append(session)
+
+        # Aggregate results from all sessions
+        for session in result.sessions:
+            result.total_hands += session.hands_played
+            result.total_payout += session.total_payout
+            result.win_count += session.win_count
+            result.loss_count += session.loss_count
+            result.push_count += session.push_count
+            result.blackjack_count += session.blackjack_count
+            result.bust_count += session.bust_count
+            result.surrender_count += session.surrender_count
+            result.double_count += session.double_count
+
+        return result
+
+    def compare_strategies(
+        self,
+        strategy_funcs: List[Callable[[Hand, Card], PlayerAction]],
+        strategy_names: List[str],
+        hands_per_strategy: int = 10000
+    ) -> dict:
+        """
+        Compare multiple strategies.
+
+        Args:
+            strategy_funcs: List of strategy functions
+            strategy_names: List of strategy names (same length as strategy_funcs)
+            hands_per_strategy: Number of hands to test each strategy
+
+        Returns:
+            Dict mapping strategy names to SimulationResults
+        """
+        results = {}
+
+        for func, name in zip(strategy_funcs, strategy_names):
+            result = self.run_simulation(hands_per_strategy, func, num_sessions=1)
+            results[name] = result
+
+        return results
