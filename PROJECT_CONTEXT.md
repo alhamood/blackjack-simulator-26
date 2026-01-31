@@ -1,7 +1,7 @@
 # Blackjack Simulator - Project Context
 
 **Last Updated:** 2026-01-30
-**Project Status:** Stage 2 - Core Game Logic (COMPLETE)
+**Project Status:** Stage 3 - Strategy & Simulation (COMPLETE)
 **Repository:** Private GitHub repository (alhamood/blackjack-simulator-26)
 
 ---
@@ -178,15 +178,32 @@ blackjack-simulator-26/
 - ✓ Demo scripts for all modules
 - ✓ **74 total passing tests**
 
-### Stage 3: Strategy & Simulation (PLANNED)
+### Stage 3: Strategy & Simulation (COMPLETE)
+**Status**: ✓ COMPLETE (2026-01-30)
 **Goal**: Add strategy execution and multi-hand simulation
 
-**Tasks:**
-- Define basic strategy data structure
-- Implement strategy loader and executor (player.py)
-- Implement simulation engine for N hands (simulator.py)
-- Add configurable game rules
-- Test strategy execution accuracy
+**Completed:**
+- ✓ player.py: JSON-based strategy system (19 tests)
+  - Load strategies from JSON files
+  - Support for hard totals, soft totals, pairs
+  - Fallback actions (double_else_hit, surrender_else_hit, etc.)
+  - Dealer upcard and pair rank normalization
+- ✓ simulator.py: Full simulation engine (22 tests)
+  - Single-session mode for accurate EV calculation
+  - Multi-session mode for variance analysis
+  - Strategy comparison framework
+  - Detailed statistics tracking
+- ✓ Strategy files:
+  - basic_strategy_h17.json: Full Wizard of Odds basic strategy
+  - never_bust.json: Toy strategy for comparison
+- ✓ Demo scripts and extensive testing
+- ✓ **115 total passing tests** (was 74)
+
+**Results:**
+- Basic strategy: ~-1% EV (expected: ~-0.5%)
+- Never-bust strategy: ~-5% EV (4% worse than basic)
+- Always-stand strategy: ~-16% EV
+- Session variance: StdDev ~0.106 over 100 sessions
 
 ### Stage 4: Results & Analysis (PLANNED)
 **Goal**: Add results tracking and reporting

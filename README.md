@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 2 - Core Game Logic ✓ COMPLETE
+**Current Stage:** Stage 3 - Strategy & Simulation ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -23,11 +23,15 @@ This simulator allows you to:
   - Hand evaluation with soft/hard ace logic
   - Dealer behavior with configurable rules
   - Complete blackjack game engine
-  - 74 passing tests across all modules
+- ✓ Stage 3: Strategy & Simulation
+  - JSON-based strategy system with Wizard of Odds basic strategy
+  - Strategy comparison framework
+  - Single-session and multi-session simulation engine
+  - Variance analysis across sessions
+  - 115 passing tests across all modules
 
 **Next Steps:**
-- Stage 3: Implement strategy execution (basic strategy from JSON)
-- Stage 4: Build multi-hand simulation engine
+- Stage 4: Advanced Analysis (card counting, detailed reporting)
 - Stage 5: Create web interface
 
 ## Installation
@@ -209,14 +213,22 @@ alhamood - 2026
 ## Roadmap
 
 - **Stage 1**: Foundation & Documentation ✓
-- **Stage 2**: Core Game Logic (cards, hands, dealer)
-- **Stage 3**: Strategy & Simulation (strategy execution, simulation engine)
-- **Stage 4**: Results & Analysis (reporting, export)
+- **Stage 2**: Core Game Logic (cards, hands, dealer) ✓
+- **Stage 3**: Strategy & Simulation (strategy execution, simulation engine) ✓
+- **Stage 4**: Advanced Analysis (card counting, detailed reporting)
 - **Stage 5**: Web Interface (FastAPI backend, static frontend)
 
 ## Version History
 
-- **v0.2 (Current)** - Stage 2: Core Game Logic - COMPLETE
+- **v0.3 (Current)** - Stage 3: Strategy & Simulation - COMPLETE
+  - JSON-based strategy system with full basic strategy
+  - Strategy comparison framework (basic vs never-bust vs always-stand)
+  - Single and multi-session simulation engine
+  - Variance analysis across sessions
+  - 115 passing unit tests
+  - Demo results: Basic strategy ~-1% EV, Never-bust ~-5% EV
+
+- **v0.2** - Stage 2: Core Game Logic - COMPLETE
   - Complete blackjack game engine
   - 74 passing unit tests
   - Support for infinite deck (CSM)
