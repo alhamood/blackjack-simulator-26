@@ -50,6 +50,14 @@ async function loadDefaults() {
             option.value = 'custom';
             option.textContent = 'Custom Strategy (User-Defined)';
             strategySelect.appendChild(option);
+
+            // Auto-select custom if redirected from strategy editor (?strategy=custom)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('strategy') === 'custom') {
+                strategySelect.value = 'custom';
+                // Clean up URL without reloading
+                window.history.replaceState({}, '', '/');
+            }
         }
 
     } catch (error) {
@@ -176,12 +184,9 @@ function validatePayloadSilent(payload) {
     return true;
 }
 
-// Check for custom strategy in localStorage
+// Check for custom strategy in localStorage (selection handled in loadDefaults)
 function checkForCustomStrategy() {
-    const customStrategy = localStorage.getItem('customStrategy');
-    if (customStrategy) {
-        console.log('Custom strategy found in localStorage');
-    }
+    // Auto-selection now happens inside loadDefaults() to avoid timing issues
 }
 
 // Handle form submission

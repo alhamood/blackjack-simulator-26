@@ -79,7 +79,7 @@ Add more default strategies for comparison:
 
 3. **Conservative Strategies**
    - Never bust (already exists as toy strategy)
-   - Mimic the dealer
+   - Mimic the dealer (already exists, ~-6% EV)
    - Always stand on 12+
 
 4. **Comparison Strategies**
@@ -96,31 +96,33 @@ Enhance strategy files with:
 - Difficulty level (beginner/intermediate/advanced)
 - Strategy type (basic/card-counting/variant)
 
-## Priority 4: Strategy Editor Validation & Improvements
+## Priority 4: Strategy Editor Validation & Improvements (Partially Complete)
+
+### Completed ✓
+- ✓ "Use in Simulation" flow fixed (server-side URL param + inline script injection)
+- ✓ Quick test button added (runs 10K hands, shows EV inline)
+- ✓ Strategy dropdown ordering fixed (H17 basic strategy always first)
+- ✓ Version numbers updated on both pages
+- ✓ Cache-busting for JS files
 
 ### Current State
 - Visual editor exists and works
 - Can create and edit custom strategies
 - Can save/load strategies
-- **Needs validation**: Editor functionality should be tested and potentially improved
+- "Use in Simulation" correctly redirects and pre-selects custom strategy
+- Quick test provides instant EV feedback without leaving editor
 
-### Planned Enhancements
-1. **Validation**
-   - Check all cells are filled
-   - Highlight missing/invalid entries
-   - Suggest common actions for cells
-
-2. **Import/Export**
+### Remaining Enhancements
+1. **Import/Export**
    - Import from CSV
    - Import from strategy description text
    - Export to shareable format
 
-3. **Templates**
+2. **Templates**
    - Pre-fill with basic strategy
    - Offer strategy templates (conservative, aggressive, etc.)
 
-4. **Testing**
-   - Quick test button (run 10k hands)
+3. **Testing Improvements**
    - Show EV comparison vs basic strategy
    - Highlight problematic decisions
 

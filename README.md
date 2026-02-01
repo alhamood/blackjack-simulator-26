@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 9 - Performance Optimization & Chart Enhancements ✓ COMPLETE
+**Current Stage:** Stage 10 - Strategy Editor Fixes & Mimic-the-Dealer ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -71,9 +71,16 @@ This simulator allows you to:
   - Input limits increased 10x (up to 100M total hands)
   - Improved time estimation accuracy (<1% error)
 
+- ✓ Stage 10: Strategy Editor Fixes & Mimic-the-Dealer
+  - Fixed "Use in Simulation" flow (server-side URL param + inline script injection)
+  - Added "Quick Test" button for instant EV feedback in editor
+  - Added mimic-the-dealer strategy (~-6% EV baseline)
+  - Fixed strategy dropdown ordering (H17 basic strategy always first)
+  - Updated version numbers and added cache-busting
+
 **Next Steps:** (See [NEXT_STEPS.md](NEXT_STEPS.md) for details)
 - Additional default strategies (card counting, conservative variants)
-- Strategy editor validation and improvements
+- Strategy editor further improvements
 - AWS deployment preparation
 
 ## Installation
@@ -315,10 +322,19 @@ alhamood - 2026
 - **Stage 7**: Enhanced Visualizations (bar charts, histograms, session statistics) ✓
 - **Stage 8**: Time Estimation & Reporting ✓
 - **Stage 9**: Performance Optimization & Chart Enhancements ✓
+- **Stage 10**: Strategy Editor Fixes & Mimic-the-Dealer ✓
 
 ## Version History
 
-- **v0.9 (Current)** - Stage 9: Performance Optimization & Chart Enhancements - COMPLETE
+- **v0.10 (Current)** - Stage 10: Strategy Editor Fixes & Mimic-the-Dealer - COMPLETE
+  - Fixed "Use in Simulation" flow: server-side URL param detection with inline script injection
+  - Added "Quick Test" button to strategy editor (10K hands, shows EV inline)
+  - Added mimic-the-dealer strategy (~-6% EV baseline comparison)
+  - Fixed strategy dropdown ordering (H17 basic strategy always first, then alphabetical)
+  - Updated version numbers on both pages (v0.5 → v0.9)
+  - Added cache-busting query strings to script tags
+
+- **v0.9** - Stage 9: Performance Optimization & Chart Enhancements - COMPLETE
   - 1.57x simulation speedup (50K hands: 1.13s → 0.72s, ~70K hands/sec)
     - Card: pre-computed numeric values, `__slots__`, frozenset validation
     - Hand: cached value/soft calculations with dirty-flag invalidation

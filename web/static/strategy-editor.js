@@ -137,6 +137,7 @@ function setupEventListeners() {
     document.getElementById('reset-btn').addEventListener('click', resetTables);
     document.getElementById('save-json-btn').addEventListener('click', saveAsJSON);
     document.getElementById('use-in-sim-btn').addEventListener('click', useInSimulation);
+    document.getElementById('quick-test-btn').addEventListener('click', quickTest);
 }
 
 // Check localStorage for existing custom strategy
@@ -338,6 +339,69 @@ function useInSimulation() {
 
     alert('Custom strategy saved! Redirecting to simulator...');
 
-    // Redirect to main page
-    window.location.href = '/';
+    // Redirect to main page with URL param to trigger custom strategy selection
+    window.location.href = '/?strategy=custom';
+}
+
+// Quick test: run 10K hands and show EV
+async function quickTest() {
+    const btn = document.getElementById('quick-test-btn');
+    const resultSpan = document.getElementById('quick-test-result');
+
+    btn.disabled = true;
+    resultSpan.textContent = 'Running...';
+    resultSpan.style.color = '#7f8c8d';
+
+    try {
+        const strategyData = extractStrategyFromTables();
+        const strategyName = document.getElementById('strategy-name').value || 'Custom Strategy';
+
+        const payload = {
+            game_rules: {
+                dealer_hits_soft_17: true,
+                surrender_allowed: true,
+                double_after_split: true,
+                blackjack_payout: 1.5
+            },
+            shoe: {
+                num_decks: 6,
+                penetration: 0.75,
+                infinite_shoe: false
+            },
+            simulation: {
+                total_hands: 10000,
+                num_sessions: 1,
+                strategy: 'custom',
+                track_hands: false,
+                debug_mode: false,
+                custom_strategy: {
+                    name: strategyName,
+                    strategy: strategyData
+                }
+            }
+        };
+
+        const response = await fetch('/api/simulate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Simulation failed');
+        }
+
+        const results = await response.json();
+        const ev = results.summary.ev_percent.toFixed(3);
+        const color = results.summary.ev_per_hand >= 0 ? '#27ae60' : '#e74c3c';
+
+        resultSpan.textContent = `EV: ${ev}% (10K hands, 6-deck, H17)`;
+        resultSpan.style.color = color;
+    } catch (error) {
+        resultSpan.textContent = `Error: ${error.message}`;
+        resultSpan.style.color = '#e74c3c';
+    } finally {
+        btn.disabled = false;
+    }
 }

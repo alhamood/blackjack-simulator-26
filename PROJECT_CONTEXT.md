@@ -1,7 +1,7 @@
 # Blackjack Simulator - Project Context
 
 **Last Updated:** 2026-01-31
-**Project Status:** Stage 9 - Performance Optimization & Chart Enhancements (COMPLETE)
+**Project Status:** Stage 10 - Strategy Editor Fixes & Mimic-the-Dealer (COMPLETE)
 **Repository:** Private GitHub repository (alhamood/blackjack-simulator-26)
 
 ---
@@ -397,6 +397,35 @@ blackjack-simulator-26/
 - `web/api.py` - Increased field limits (10M hands, 100K sessions, 100M total)
 - `web/static/app.js` - Zero-boundary histogram, payout labels, increased validation limits
 - `web/static/index.html` - Increased max attributes on inputs
+
+### Stage 10: Strategy Editor Fixes & Mimic-the-Dealer (COMPLETE)
+**Status**: ✓ COMPLETE (2026-01-31)
+**Goal**: Fix strategy editor "Use in Simulation" flow, add new strategy, improve UX
+
+**Strategy Editor Fixes:**
+- ✓ Fixed "Use in Simulation" button: now redirects to `/?strategy=custom` with server-side inline script injection
+  - Server detects `?strategy=custom` URL param and injects `<script>` to auto-select custom strategy
+  - Eliminates browser caching issues with external JS files
+  - Custom strategy data passed via localStorage, selection triggered via injected inline script with 500ms delay
+- ✓ Added "Quick Test" button: runs 10K-hand simulation inline and shows EV result
+  - Uses standard game rules (6-deck, H17, surrender, DAS, 3:2 BJ)
+  - Color-coded result (green/red) displayed next to button
+- ✓ Fixed strategy dropdown ordering: `basic_strategy_h17` always appears first
+  - `glob()` returns non-deterministic order; added explicit sort in both `/api/defaults` and `/api/strategies`
+- ✓ Updated version numbers: both index.html and strategy-editor.html updated from v0.5 to v0.9
+- ✓ Added cache-busting query strings to `<script>` tags (`?v=0.9.1`)
+
+**New Strategy:**
+- ✓ Added `mimic_the_dealer.json`: hit on hard ≤16, hit soft 17, stand hard 17+, no doubles/splits/surrenders
+  - Tested at ~-6.27% EV (baseline comparison strategy)
+
+**Key files modified:**
+- `web/api.py` - Server-side `?strategy=custom` handling with inline script injection, strategy sort order
+- `web/static/app.js` - Custom strategy auto-selection logic, `checkForCustomStrategy()` cleanup
+- `web/static/strategy-editor.js` - `useInSimulation()` redirect with URL param, `quickTest()` function
+- `web/static/strategy-editor.html` - Quick test button, version update, cache-busting script tag
+- `web/static/index.html` - Version update, cache-busting script tag
+- `config/strategies/mimic_the_dealer.json` - New strategy file
 
 ---
 

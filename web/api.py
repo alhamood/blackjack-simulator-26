@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any, List
 from collections import defaultdict
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 import tempfile
@@ -277,6 +277,9 @@ async def get_defaults():
         except Exception:
             continue
 
+    # Sort: basic_strategy_h17 first, then alphabetically by name
+    available_strategies.sort(key=lambda s: (0 if s["id"] == "basic_strategy_h17" else 1, s["name"]))
+
     return {
         "game_rules": {
             "dealer_hits_soft_17": True,
@@ -316,6 +319,9 @@ async def list_strategies():
             })
         except Exception:
             continue
+
+    # Sort: basic_strategy_h17 first, then alphabetically by name
+    strategies.sort(key=lambda s: (0 if s["id"] == "basic_strategy_h17" else 1, s["name"]))
 
     return {"strategies": strategies}
 
@@ -518,12 +524,32 @@ if static_dir.exists():
 
 
 @app.get("/")
-async def read_index():
-    """Serve index.html."""
+async def read_index(strategy: Optional[str] = None):
+    """Serve index.html, optionally pre-selecting a strategy."""
     index_path = static_dir / "index.html"
-    if index_path.exists():
-        return FileResponse(str(index_path))
-    return {"message": "Blackjack Simulator API - Frontend not yet deployed"}
+    if not index_path.exists():
+        return {"message": "Blackjack Simulator API - Frontend not yet deployed"}
+
+    if strategy == "custom":
+        # Inject inline script to auto-select custom strategy after page loads
+        html = index_path.read_text()
+        inject = (
+            '<script>'
+            'window.__selectCustomStrategy = true;'
+            'document.addEventListener("DOMContentLoaded", function() {'
+            '  setTimeout(function() {'
+            '    var sel = document.getElementById("strategy");'
+            '    if (sel) { for (var i = 0; i < sel.options.length; i++) {'
+            '      if (sel.options[i].value === "custom") { sel.selectedIndex = i; break; }'
+            '    }}'
+            '  }, 500);'
+            '});'
+            '</script>'
+        )
+        html = html.replace('</body>', inject + '</body>')
+        return HTMLResponse(content=html)
+
+    return FileResponse(str(index_path))
 
 
 @app.get("/strategy-editor.html")
