@@ -162,33 +162,55 @@
                     </div>
                 </div>
 
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-container">
-                        <h3>Hand Outcome Distribution</h3>
-                        <canvas id="handOutcomeChart"></canvas>
-                    </div>
+                <!-- Session-Level Analysis -->
+                <div class="analysis-section">
+                    <h2 class="section-heading">Session-Level Analysis</h2>
+
                     <div class="chart-container">
                         <h3>Session Payout Distribution</h3>
                         <canvas id="sessionOutcomeChart"></canvas>
                     </div>
+
+                    <div id="session-stats-section" class="detailed-stats">
+                        <h3>Session Statistics</h3>
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Statistic</th>
+                                    <th>Value</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody id="session-stats-tbody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <!-- Detailed Stats -->
-                <div class="detailed-stats">
-                    <h3>Detailed Breakdown</h3>
-                    <table class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Outcome</th>
-                                <th>Count</th>
-                                <th>Percentage</th>
-                                <th>Total Payout</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stats-tbody">
-                        </tbody>
-                    </table>
+                <!-- Hand-Level Analysis -->
+                <div class="analysis-section">
+                    <h2 class="section-heading">Hand-Level Analysis</h2>
+
+                    <div class="chart-container">
+                        <h3>Hand Outcome Distribution</h3>
+                        <canvas id="handOutcomeChart"></canvas>
+                    </div>
+
+                    <div class="detailed-stats">
+                        <h3>Detailed Breakdown</h3>
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Outcome</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                    <th>Total Payout</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats-tbody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Debug Information -->

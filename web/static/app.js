@@ -259,10 +259,11 @@ function displayResults(results) {
     }
 
     // Create charts
-    createHandOutcomeChart(results);
     createSessionOutcomeChart(results);
+    createHandOutcomeChart(results);
 
-    // Update detailed stats table
+    // Update stats tables
+    updateSessionStatsTable(results);
     updateStatsTable(summary);
 
     // Display debug information if available
@@ -288,22 +289,26 @@ function createHandOutcomeChart(results) {
     // Analyze hand results to categorize outcomes
     const categories = analyzeHandOutcomes(results);
 
+    // Sort data descending by count
+    const combined = categories.labels.map((label, i) => ({
+        label: label,
+        data: categories.data[i],
+        color: categories.colors[i]
+    }));
+    combined.sort((a, b) => b.data - a.data);
+
+    const sortedLabels = combined.map(item => item.label);
+    const sortedData = combined.map(item => item.data);
+    const sortedColors = combined.map(item => item.color);
+
     handOutcomeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: categories.labels,
+            labels: sortedLabels,
             datasets: [{
                 label: 'Hand Count',
-                data: categories.data,
-                backgroundColor: [
-                    '#f39c12',  // Orange for blackjacks
-                    '#27ae60',  // Green for double wins
-                    '#c0392b',  // Dark red for double losses
-                    '#2ecc71',  // Light green for regular wins
-                    '#e74c3c',  // Red for regular losses
-                    '#95a5a6',  // Gray for surrenders
-                    '#7f8c8d'   // Dark gray for pushes
-                ],
+                data: sortedData,
+                backgroundColor: sortedColors,
                 borderWidth: 1,
                 borderColor: '#2c3e50'
             }]
@@ -435,6 +440,15 @@ function analyzeHandOutcomes(results) {
             Math.max(0, regularLosses),
             summary.surrender_count,
             summary.push_count
+        ],
+        colors: [
+            '#f39c12',  // Orange for blackjacks
+            '#27ae60',  // Green for double wins
+            '#c0392b',  // Dark red for double losses
+            '#2ecc71',  // Light green for regular wins
+            '#e74c3c',  // Red for regular losses
+            '#95a5a6',  // Gray for surrenders
+            '#7f8c8d'   // Dark gray for pushes
         ]
     };
 }
@@ -603,6 +617,80 @@ function updateStatsTable(summary) {
 
         tbody.appendChild(row);
     });
+}
+
+// Update session statistics table
+function updateSessionStatsTable(results) {
+    if (!results.sessions || results.sessions.length === 0) {
+        document.getElementById('session-stats-section').classList.add('hidden');
+        return;
+    }
+
+    document.getElementById('session-stats-section').classList.remove('hidden');
+
+    // Extract session payouts
+    const payouts = results.sessions.map(s => s.total_payout).sort((a, b) => a - b);
+    const n = payouts.length;
+
+    // Calculate percentiles
+    const percentile = (p) => {
+        const index = (p / 100) * (n - 1);
+        const lower = Math.floor(index);
+        const upper = Math.ceil(index);
+        const weight = index - lower;
+        return payouts[lower] * (1 - weight) + payouts[upper] * weight;
+    };
+
+    // Calculate statistics
+    const mean = payouts.reduce((a, b) => a + b, 0) / n;
+    const variance = payouts.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / n;
+    const stdDev = Math.sqrt(variance);
+
+    const p10 = percentile(10);
+    const p25 = percentile(25);
+    const p50 = percentile(50);  // Median
+    const p75 = percentile(75);
+    const p90 = percentile(90);
+
+    // Update table
+    const tbody = document.getElementById('session-stats-tbody');
+    tbody.innerHTML = `
+        <tr>
+            <td>Mean Payout</td>
+            <td>${mean >= 0 ? '+' : ''}${mean.toFixed(3)} units</td>
+            <td>Average session result</td>
+        </tr>
+        <tr>
+            <td>Median (P50)</td>
+            <td>${p50 >= 0 ? '+' : ''}${p50.toFixed(3)} units</td>
+            <td>50th percentile</td>
+        </tr>
+        <tr>
+            <td>Standard Deviation</td>
+            <td>${stdDev.toFixed(3)} units</td>
+            <td>Measure of variability</td>
+        </tr>
+        <tr>
+            <td>P10</td>
+            <td>${p10 >= 0 ? '+' : ''}${p10.toFixed(3)} units</td>
+            <td>10% of sessions worse than this</td>
+        </tr>
+        <tr>
+            <td>P25</td>
+            <td>${p25 >= 0 ? '+' : ''}${p25.toFixed(3)} units</td>
+            <td>25% of sessions worse than this</td>
+        </tr>
+        <tr>
+            <td>P75</td>
+            <td>${p75 >= 0 ? '+' : ''}${p75.toFixed(3)} units</td>
+            <td>75% of sessions worse than this</td>
+        </tr>
+        <tr>
+            <td>P90</td>
+            <td>${p90 >= 0 ? '+' : ''}${p90.toFixed(3)} units</td>
+            <td>90% of sessions worse than this</td>
+        </tr>
+    `;
 }
 
 // Display debug information
