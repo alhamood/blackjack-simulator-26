@@ -2,29 +2,39 @@
 
 This document outlines planned enhancements and deployment steps for the blackjack simulator.
 
-## Priority 1: Visualization Improvements
+## Priority 1: Visualization Improvements ✓ COMPLETE
 
-### Hand Outcomes Visualization
-- **Current**: Pie chart showing distribution of hand outcomes
-- **Target**: Column/bar chart for better comparison
-  - X-axis: Outcome types (Player Win, Dealer Win, Push, Blackjack, etc.)
-  - Y-axis: Count or percentage
-  - Better for comparing relative frequencies
-  - Clearer representation of split vs non-split outcomes
+### Hand Outcomes Visualization ✓
+- **Previous**: Pie chart showing distribution of hand outcomes
+- **Implemented**: Column/bar chart sorted descending by count
+  - X-axis: Outcome types (Blackjacks, Double Wins/Losses, Regular Wins/Losses, Surrenders, Pushes)
+  - Y-axis: Count
+  - Color-coded bars for visual distinction
+  - Sorted left-to-right by frequency for better readability
 
-### Session Outcomes Visualization
-- **Current**: Pie chart showing winning/losing/break-even sessions
-- **Target**: Histogram showing distribution of session-level results
-  - X-axis: Session EV or payout (binned)
+### Session Outcomes Visualization ✓
+- **Previous**: Pie chart showing winning/losing/break-even sessions
+- **Implemented**: Histogram showing distribution of session-level payouts
+  - X-axis: Session payout bins (using Sturges' rule for optimal bin count)
   - Y-axis: Frequency (number of sessions)
+  - Color-coded: green for profitable bins, red for losing bins, gray for neutral
   - Shows full distribution shape (normal, skewed, etc.)
   - Helps visualize variance and risk
-  - Useful for bankroll management planning
 
-### Layout
-- Stack both charts vertically for easy comparison
-- Responsive design for mobile viewing
-- Consider adding toggle to switch between chart types
+### Session Statistics Table ✓
+- **Implemented**: Comprehensive session-level statistics
+  - Percentiles: P10, P25, P50 (median), P75, P90
+  - Mean payout per session
+  - Standard deviation (volatility measure)
+  - Descriptive text explaining each metric
+
+### Layout ✓
+- Reorganized into two clear sections:
+  - Session-Level Analysis (histogram + statistics table)
+  - Hand-Level Analysis (sorted bar chart + detailed breakdown)
+- Visual separators and section headings
+- Stacked vertically for easy comparison
+- Responsive design maintained
 
 ## Priority 2: Performance & UX Improvements
 
@@ -91,14 +101,15 @@ Enhance strategy files with:
 - Difficulty level (beginner/intermediate/advanced)
 - Strategy type (basic/card-counting/variant)
 
-## Priority 4: Strategy Editor Improvements
+## Priority 4: Strategy Editor Validation & Improvements
 
 ### Current State
 - Visual editor exists and works
 - Can create and edit custom strategies
 - Can save/load strategies
+- **Needs validation**: Editor functionality should be tested and potentially improved
 
-### Enhancements
+### Planned Enhancements
 1. **Validation**
    - Check all cells are filled
    - Highlight missing/invalid entries
@@ -171,13 +182,47 @@ Enhance strategy files with:
 
 ## Future Enhancements (Lower Priority)
 
+### Betting Strategies
+A significant enhancement would be to support different betting strategies beyond flat betting:
+
+1. **Fixed Betting Systems**
+   - Flat betting (current implementation - 1 unit per hand)
+   - Fixed percentage of bankroll
+   - Fixed amount per session
+
+2. **Progressive Systems**
+   - Martingale (double after loss)
+   - Reverse Martingale (double after win)
+   - D'Alembert (increase/decrease by 1 unit)
+   - Fibonacci progression
+   - Labouchere system
+
+3. **Card Counting Based**
+   - Hi-Lo true count betting ramp
+   - Kelly Criterion with running count
+   - Wong halves with bet spread
+
+4. **Risk-Adjusted**
+   - Kelly Criterion (optimal bet sizing)
+   - Fractional Kelly (conservative variant)
+   - Fixed risk of ruin percentage
+
+**Implementation Considerations:**
+- Add `BettingStrategy` class separate from playing strategy
+- Track bankroll across sessions (currently each session is independent)
+- Add risk of ruin calculations
+- Show betting statistics (average bet, max bet, bet spread)
+- Warn about gambler's fallacy for non-card-counting systems
+- Educational content explaining why most systems don't change house edge
+
+**Complexity:** High - requires architectural changes to track bankroll state, session dependencies, and potentially bet-level tracking rather than just hand-level.
+
 ### Advanced Features
 - User accounts and saved simulations
 - Strategy sharing community
 - Comparative analysis (multiple strategies side-by-side)
-- Betting system simulation (Martingale, Kelly Criterion, etc.)
-- Risk of ruin calculator
-- Bankroll management tools
+- Risk of ruin calculator with different betting strategies
+- Bankroll management tools and simulators
 
 ### Statistical Analysis
 - Confidence intervals for EV

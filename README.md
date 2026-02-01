@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 6 - Split Implementation & Refinement ✓ COMPLETE
+**Current Stage:** Stage 7 - Enhanced Visualizations ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -49,11 +49,18 @@ This simulator allows you to:
   - Debug mode with strategy categorization
   - Action history tracking for verification
   - EV calculations now accurate (~-0.5% for optimal basic strategy)
+- ✓ Stage 7: Enhanced Visualizations
+  - Replaced pie charts with bar chart (hand outcomes) and histogram (session distribution)
+  - Hand outcome chart sorted descending by frequency
+  - Session statistics table with percentiles (P10, P25, P50, P75, P90)
+  - Reorganized UI into Session-Level and Hand-Level Analysis sections
+  - Color-coded charts for better visual distinction
+  - Sturges' rule for optimal histogram binning
 
 **Next Steps:** (See [NEXT_STEPS.md](NEXT_STEPS.md) for details)
-- Enhanced visualizations (column charts, histograms)
-- Performance optimizations and progress tracking
-- Additional default strategies
+- Strategy editor validation and improvements
+- Performance optimizations and progress tracking (remove hand limit, add warnings)
+- Additional default strategies (card counting, conservative variants)
 - AWS deployment preparation
 
 ## Installation
@@ -182,12 +189,18 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
   - Debug mode for strategy verification
 - **Results Display**:
   - Summary statistics (EV, win rate, total payout, split count)
-  - Two interactive pie charts:
-    - Hand-level outcomes (blackjacks, doubles, regular wins/losses, surrenders, pushes, splits)
-    - Session-level outcomes (winning vs losing vs break-even sessions)
-  - Hierarchical breakdown table with payout analysis
-    - Shows wins/losses/pushes with indented sub-categories
-    - Displays count, percentage, and total payout in units for each outcome type
+  - **Session-Level Analysis**:
+    - Interactive histogram showing distribution of session payouts
+    - Color-coded bins (green for profit, red for loss, gray for break-even)
+    - Optimal binning using Sturges' rule
+    - Comprehensive statistics table with percentiles (P10, P25, P50, P75, P90), mean, and standard deviation
+  - **Hand-Level Analysis**:
+    - Bar chart of hand outcomes sorted descending by frequency
+    - Categories: Blackjacks, Double Wins/Losses, Regular Wins/Losses, Surrenders, Pushes
+    - Color-coded bars for visual distinction
+    - Hierarchical breakdown table with payout analysis
+      - Shows wins/losses/pushes with indented sub-categories
+      - Displays count, percentage, and total payout in units for each outcome type
   - Debug mode output:
     - Hands categorized by strategy situation (hard_12_vs_10, pair_8_vs_5, etc.)
     - Initial 2-card hand for accurate strategy verification
@@ -285,10 +298,28 @@ alhamood - 2026
 - **Stage 3**: Strategy & Simulation (strategy execution, simulation engine) ✓
 - **Stage 4**: Results & Analysis (CSV/JSON export, hand tracking) ✓
 - **Stage 5**: Web Interface (FastAPI backend, static frontend) ✓
+- **Stage 6**: Split Implementation & Strategy Verification ✓
+- **Stage 7**: Enhanced Visualizations (bar charts, histograms, session statistics) ✓
 
 ## Version History
 
-- **v0.6 (Current)** - Stage 6: Split Implementation & Strategy Verification - COMPLETE
+- **v0.7 (Current)** - Stage 7: Enhanced Visualizations - COMPLETE
+  - Replaced pie charts with more informative visualizations:
+    - Hand outcomes: Sorted descending bar chart
+    - Session outcomes: Histogram with optimal binning (Sturges' rule)
+  - Added comprehensive session statistics table:
+    - Percentiles: P10, P25, P50 (median), P75, P90
+    - Mean and standard deviation
+    - Descriptive explanations for each metric
+  - Reorganized results UI into two clear sections:
+    - Session-Level Analysis (variance and distribution)
+    - Hand-Level Analysis (detailed outcome breakdown)
+  - Enhanced color coding:
+    - Profit/loss indicators on histogram (green/red/gray)
+    - Distinct colors for each hand outcome type
+  - Improved information architecture for better user understanding
+
+- **v0.6** - Stage 6: Split Implementation & Strategy Verification - COMPLETE
   - Complete split/re-split logic with up to 4 hands
   - Split aces handling (one card only, correct casino rules)
   - Double after split support (configurable)
