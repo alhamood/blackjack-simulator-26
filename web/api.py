@@ -561,6 +561,15 @@ async def read_strategy_editor():
     raise HTTPException(status_code=404, detail="Strategy editor not found")
 
 
+@app.get("/strategy-reference.html")
+async def read_strategy_reference():
+    """Serve strategy reference page."""
+    ref_path = static_dir / "strategy-reference.html"
+    if ref_path.exists():
+        return FileResponse(str(ref_path))
+    raise HTTPException(status_code=404, detail="Strategy reference not found")
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))

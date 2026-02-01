@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy EV Reference - Blackjack Simulator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .reference-container {
+            max-width: 1400px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .section-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .reference-table th,
+        .reference-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .reference-table th {
+            background-color: #34495e;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .reference-table th:hover {
+            background-color: #2c3e50;
+        }
+
+        .reference-table th .sort-arrow {
+            margin-left: 4px;
+            font-size: 0.7em;
+        }
+
+        .reference-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .reference-table tr.cross-test {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .reference-table tr.cross-test td:first-child::before {
+            content: "↳ ";
+            color: #7f8c8d;
+        }
+
+        .house-edge-low {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .house-edge-mid {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        .house-edge-high {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .convergence-table {
+            width: auto;
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .convergence-table th,
+        .convergence-table td {
+            border: 1px solid #ddd;
+            padding: 8px 14px;
+            text-align: center;
+        }
+
+        .convergence-table th {
+            background-color: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+
+        .converged-yes {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .converged-no {
+            color: #e74c3c;
+        }
+
+        .metadata-footer {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .info-text {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container reference-container">
+        <header>
+            <a href="/" class="back-link">&larr; Back to Simulator</a>
+            <h1>Strategy EV Reference</h1>
+            <p class="subtitle">Definitive expected value data for all strategies</p>
+        </header>
+
+        <main>
+            <!-- Convergence Section -->
+            <section class="section-card" id="convergence-section" style="display: none;">
+                <h2>EV Convergence Analysis</h2>
+                <p class="info-text">
+                    How many hands do we need to reliably estimate a strategy's EV?
+                    We ran 10 independent trials at each hand count and measured the spread of EV estimates.
+                </p>
+                <div id="convergence-content"></div>
+            </section>
+
+            <!-- Reference Table Section -->
+            <section class="section-card" id="reference-section">
+                <h2>Strategy Performance</h2>
+                <p class="info-text" id="reference-intro">Loading...</p>
+                <div id="reference-content">
+                    <div class="loading">Loading strategy data...</div>
+                </div>
+            </section>
+
+            <div class="metadata-footer" id="metadata-footer"></div>
+        </main>
+
+        <footer>
+            <p>Blackjack Simulator v0.10 | <a href="https://github.com/alhamood/blackjack-simulator-26">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let referenceData = null;
+        let currentSort = { key: 'house_edge', ascending: true };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/static/data/strategy_reference.json');
+                if (!response.ok) throw new Error('Failed to load reference data');
+                referenceData = await response.json();
+                renderConvergence();
+                renderReferenceTable();
+                renderMetadata();
+            } catch (error) {
+                document.getElementById('reference-content').innerHTML =
+                    '<p style="color: #e74c3c;">Failed to load reference data. Run scripts/generate_reference_data.py first.</p>';
+            }
+        });
+
+        function renderConvergence() {
+            if (!referenceData.convergence) return;
+
+            const section = document.getElementById('convergence-section');
+            section.style.display = 'block';
+
+            const conv = referenceData.convergence;
+            const levels = conv.levels;
+            const rec = conv.recommendation;
+
+            let html = '<table class="convergence-table"><thead><tr>';
+            html += '<th>Hands</th><th>Mean EV</th><th>Stdev</th><th>Range</th><th>Converged?</th>';
+            html += '</tr></thead><tbody>';
+
+            levels.forEach(level => {
+                const convergedClass = level.converged ? 'converged-yes' : 'converged-no';
+                const convergedText = level.converged ? '&#10003;' : '&#10007;';
+                html += '<tr>';
+                html += `<td>${formatHandCount(level.hand_count)}</td>`;
+                html += `<td>${level.ev_mean_percent.toFixed(4)}%</td>`;
+                html += `<td>${level.ev_stdev_percent.toFixed(4)}%</td>`;
+                html += `<td>${level.ev_range_percent.toFixed(4)}%</td>`;
+                html += `<td class="${convergedClass}">${convergedText}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+
+            if (rec && rec.note) {
+                html += `<p class="info-text" style="margin-top: 15px; text-align: center;"><strong>Result:</strong> ${rec.note}</p>`;
+            }
+
+            document.getElementById('convergence-content').innerHTML = html;
+        }
+
+        function renderReferenceTable() {
+            if (!referenceData.results || referenceData.results.length === 0) {
+                document.getElementById('reference-content').innerHTML = '<p>No reference data available.</p>';
+                return;
+            }
+
+            const hands = referenceData.metadata.hands_per_simulation;
+            document.getElementById('reference-intro').textContent =
+                `Each result below is based on ${formatHandCount(hands)} simulated hands per strategy/config combination.`;
+
+            const results = sortResults([...referenceData.results]);
+
+            const columns = [
+                { key: 'strategy', label: 'Strategy', sortKey: 'strategy_name' },
+                { key: 'config', label: 'Config', sortKey: 'config_label' },
+                { key: 'house_edge', label: 'House Edge', sortKey: r => r.results.house_edge_percent },
+                { key: 'ev_percent', label: 'EV %', sortKey: r => r.results.ev_percent },
+                { key: 'win_rate', label: 'Win Rate', sortKey: r => r.results.win_rate },
+                { key: 'bj_rate', label: 'BJ Rate', sortKey: r => r.results.blackjack_rate },
+                { key: 'bust_rate', label: 'Bust Rate', sortKey: r => r.results.bust_rate },
+                { key: 'double_rate', label: 'Double Rate', sortKey: r => r.results.double_rate },
+                { key: 'split_rate', label: 'Split Rate', sortKey: r => r.results.split_rate },
+                { key: 'surrender_rate', label: 'Surrender', sortKey: r => r.results.surrender_rate },
+            ];
+
+            let html = '<table class="reference-table"><thead><tr>';
+            columns.forEach(col => {
+                const arrow = currentSort.key === col.key
+                    ? (currentSort.ascending ? ' &#9650;' : ' &#9660;')
+                    : '';
+                html += `<th data-sort="${col.key}">${col.label}<span class="sort-arrow">${arrow}</span></th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            results.forEach(row => {
+                const r = row.results;
+                const rowClass = row.is_natural_config ? '' : ' class="cross-test"';
+                const heClass = houseEdgeClass(r.house_edge_percent);
+
+                html += `<tr${rowClass}>`;
+                html += `<td>${row.strategy_name}</td>`;
+                html += `<td>${row.config_label}</td>`;
+                html += `<td class="${heClass}">${r.house_edge_percent.toFixed(3)}%</td>`;
+                html += `<td>${r.ev_percent >= 0 ? '+' : ''}${r.ev_percent.toFixed(3)}%</td>`;
+                html += `<td>${(r.win_rate * 100).toFixed(2)}%</td>`;
+                html += `<td>${(r.blackjack_rate * 100).toFixed(2)}%</td>`;
+                html += `<td>${(r.bust_rate * 100).toFixed(2)}%</td>`;
+                html += `<td>${(r.double_rate * 100).toFixed(2)}%</td>`;
+                html += `<td>${(r.split_rate * 100).toFixed(2)}%</td>`;
+                html += `<td>${(r.surrender_rate * 100).toFixed(2)}%</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('reference-content').innerHTML = html;
+
+            // Attach sort handlers
+            document.querySelectorAll('.reference-table th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.sort;
+                    if (currentSort.key === key) {
+                        currentSort.ascending = !currentSort.ascending;
+                    } else {
+                        currentSort.key = key;
+                        currentSort.ascending = true;
+                    }
+                    renderReferenceTable();
+                });
+            });
+        }
+
+        function sortResults(results) {
+            const key = currentSort.key;
+            const asc = currentSort.ascending;
+
+            const getValue = (row) => {
+                switch (key) {
+                    case 'strategy': return row.strategy_name.toLowerCase();
+                    case 'config': return row.config_label.toLowerCase();
+                    case 'house_edge': return row.results.house_edge_percent;
+                    case 'ev_percent': return row.results.ev_percent;
+                    case 'win_rate': return row.results.win_rate;
+                    case 'bj_rate': return row.results.blackjack_rate;
+                    case 'bust_rate': return row.results.bust_rate;
+                    case 'double_rate': return row.results.double_rate;
+                    case 'split_rate': return row.results.split_rate;
+                    case 'surrender_rate': return row.results.surrender_rate;
+                    default: return row.results.house_edge_percent;
+                }
+            };
+
+            return results.sort((a, b) => {
+                const va = getValue(a);
+                const vb = getValue(b);
+                if (typeof va === 'string') {
+                    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+                }
+                return asc ? va - vb : vb - va;
+            });
+        }
+
+        function houseEdgeClass(he) {
+            if (he < 0.5) return 'house-edge-low';
+            if (he < 2.0) return 'house-edge-mid';
+            return 'house-edge-high';
+        }
+
+        function formatHandCount(n) {
+            if (n >= 1_000_000) return (n / 1_000_000).toFixed(0) + 'M';
+            if (n >= 1_000) return (n / 1_000).toFixed(0) + 'K';
+            return n.toLocaleString();
+        }
+
+        function renderMetadata() {
+            const meta = referenceData.metadata;
+            const date = new Date(meta.generated_at).toLocaleDateString();
+            document.getElementById('metadata-footer').textContent =
+                `Based on ${formatHandCount(meta.hands_per_simulation)} hands per simulation | ` +
+                `${meta.total_simulations} configurations tested | Generated ${date}`;
+        }
+    </script>
+</body>
+</html>

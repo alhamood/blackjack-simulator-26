@@ -1,0 +1,467 @@
+{
+  "metadata": {
+    "strategy_id": "basic_strategy_h17",
+    "strategy_name": "Basic Strategy (H17, Surrender)",
+    "rules": {
+      "num_decks": 6,
+      "dealer_hits_soft_17": true,
+      "surrender_allowed": true,
+      "double_after_split": true,
+      "blackjack_payout": 1.5,
+      "penetration": 0.75
+    },
+    "trials_per_level": 10,
+    "convergence_threshold": 0.0001,
+    "generated_at": "2026-02-01T13:27:38.543246",
+    "total_elapsed_seconds": 2440.7
+  },
+  "levels": [
+    {
+      "hand_count": 10000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.02375,
+          "elapsed_seconds": 0.146
+        },
+        {
+          "trial": 2,
+          "ev": -0.00775,
+          "elapsed_seconds": 0.146
+        },
+        {
+          "trial": 3,
+          "ev": -0.0022,
+          "elapsed_seconds": 0.146
+        },
+        {
+          "trial": 4,
+          "ev": 0.01015,
+          "elapsed_seconds": 0.147
+        },
+        {
+          "trial": 5,
+          "ev": -0.0357,
+          "elapsed_seconds": 0.147
+        },
+        {
+          "trial": 6,
+          "ev": -0.00905,
+          "elapsed_seconds": 0.147
+        },
+        {
+          "trial": 7,
+          "ev": -0.0172,
+          "elapsed_seconds": 0.145
+        },
+        {
+          "trial": 8,
+          "ev": 0.0064,
+          "elapsed_seconds": 0.147
+        },
+        {
+          "trial": 9,
+          "ev": -0.01625,
+          "elapsed_seconds": 0.146
+        },
+        {
+          "trial": 10,
+          "ev": -0.0014,
+          "elapsed_seconds": 0.147
+        }
+      ],
+      "ev_mean": -0.009675,
+      "ev_stdev": 0.01396482,
+      "ev_stdev_percent": 1.396482,
+      "ev_min": -0.0357,
+      "ev_max": 0.01015,
+      "ev_range": 0.04585,
+      "ev_range_percent": 4.585,
+      "converged": false
+    },
+    {
+      "hand_count": 50000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": 0.00195,
+          "elapsed_seconds": 0.73
+        },
+        {
+          "trial": 2,
+          "ev": -0.0063,
+          "elapsed_seconds": 0.732
+        },
+        {
+          "trial": 3,
+          "ev": -0.00566,
+          "elapsed_seconds": 0.734
+        },
+        {
+          "trial": 4,
+          "ev": 0.00577,
+          "elapsed_seconds": 0.73
+        },
+        {
+          "trial": 5,
+          "ev": -0.00811,
+          "elapsed_seconds": 0.733
+        },
+        {
+          "trial": 6,
+          "ev": -0.00195,
+          "elapsed_seconds": 0.731
+        },
+        {
+          "trial": 7,
+          "ev": -0.00894,
+          "elapsed_seconds": 0.729
+        },
+        {
+          "trial": 8,
+          "ev": 0.00401,
+          "elapsed_seconds": 0.73
+        },
+        {
+          "trial": 9,
+          "ev": -0.00121,
+          "elapsed_seconds": 0.731
+        },
+        {
+          "trial": 10,
+          "ev": -0.00306,
+          "elapsed_seconds": 0.742
+        }
+      ],
+      "ev_mean": -0.00235,
+      "ev_stdev": 0.00505527,
+      "ev_stdev_percent": 0.505527,
+      "ev_min": -0.00894,
+      "ev_max": 0.00577,
+      "ev_range": 0.01471,
+      "ev_range_percent": 1.471,
+      "converged": false
+    },
+    {
+      "hand_count": 100000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.00804,
+          "elapsed_seconds": 1.458
+        },
+        {
+          "trial": 2,
+          "ev": -0.008985,
+          "elapsed_seconds": 1.462
+        },
+        {
+          "trial": 3,
+          "ev": -0.006315,
+          "elapsed_seconds": 1.458
+        },
+        {
+          "trial": 4,
+          "ev": -0.00771,
+          "elapsed_seconds": 1.46
+        },
+        {
+          "trial": 5,
+          "ev": -0.00775,
+          "elapsed_seconds": 1.46
+        },
+        {
+          "trial": 6,
+          "ev": -0.00738,
+          "elapsed_seconds": 1.458
+        },
+        {
+          "trial": 7,
+          "ev": -0.00293,
+          "elapsed_seconds": 1.46
+        },
+        {
+          "trial": 8,
+          "ev": -0.002205,
+          "elapsed_seconds": 1.47
+        },
+        {
+          "trial": 9,
+          "ev": 0.00014,
+          "elapsed_seconds": 1.46
+        },
+        {
+          "trial": 10,
+          "ev": -0.007085,
+          "elapsed_seconds": 1.456
+        }
+      ],
+      "ev_mean": -0.005826,
+      "ev_stdev": 0.00304527,
+      "ev_stdev_percent": 0.304527,
+      "ev_min": -0.008985,
+      "ev_max": 0.00014,
+      "ev_range": 0.009125,
+      "ev_range_percent": 0.9125,
+      "converged": false
+    },
+    {
+      "hand_count": 500000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.007595,
+          "elapsed_seconds": 7.298
+        },
+        {
+          "trial": 2,
+          "ev": -0.007511,
+          "elapsed_seconds": 7.294
+        },
+        {
+          "trial": 3,
+          "ev": -0.005388,
+          "elapsed_seconds": 7.299
+        },
+        {
+          "trial": 4,
+          "ev": -0.006845,
+          "elapsed_seconds": 7.292
+        },
+        {
+          "trial": 5,
+          "ev": -0.004122,
+          "elapsed_seconds": 7.286
+        },
+        {
+          "trial": 6,
+          "ev": -0.005048,
+          "elapsed_seconds": 7.284
+        },
+        {
+          "trial": 7,
+          "ev": -0.008235,
+          "elapsed_seconds": 7.287
+        },
+        {
+          "trial": 8,
+          "ev": -0.004157,
+          "elapsed_seconds": 7.276
+        },
+        {
+          "trial": 9,
+          "ev": -0.005935,
+          "elapsed_seconds": 7.285
+        },
+        {
+          "trial": 10,
+          "ev": -0.004029,
+          "elapsed_seconds": 7.296
+        }
+      ],
+      "ev_mean": -0.0058865,
+      "ev_stdev": 0.00158117,
+      "ev_stdev_percent": 0.158117,
+      "ev_min": -0.008235,
+      "ev_max": -0.004029,
+      "ev_range": 0.004206,
+      "ev_range_percent": 0.4206,
+      "converged": false
+    },
+    {
+      "hand_count": 1000000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.0056215,
+          "elapsed_seconds": 14.563
+        },
+        {
+          "trial": 2,
+          "ev": -0.007658,
+          "elapsed_seconds": 14.592
+        },
+        {
+          "trial": 3,
+          "ev": -0.008389,
+          "elapsed_seconds": 14.57
+        },
+        {
+          "trial": 4,
+          "ev": -0.0071795,
+          "elapsed_seconds": 14.526
+        },
+        {
+          "trial": 5,
+          "ev": -0.0055065,
+          "elapsed_seconds": 14.515
+        },
+        {
+          "trial": 6,
+          "ev": -0.0044175,
+          "elapsed_seconds": 14.599
+        },
+        {
+          "trial": 7,
+          "ev": -0.006746,
+          "elapsed_seconds": 14.615
+        },
+        {
+          "trial": 8,
+          "ev": -0.005613,
+          "elapsed_seconds": 14.615
+        },
+        {
+          "trial": 9,
+          "ev": -0.0050925,
+          "elapsed_seconds": 14.575
+        },
+        {
+          "trial": 10,
+          "ev": -0.0060475,
+          "elapsed_seconds": 14.612
+        }
+      ],
+      "ev_mean": -0.0062271,
+      "ev_stdev": 0.00123626,
+      "ev_stdev_percent": 0.123626,
+      "ev_min": -0.008389,
+      "ev_max": -0.0044175,
+      "ev_range": 0.0039715,
+      "ev_range_percent": 0.39715,
+      "converged": false
+    },
+    {
+      "hand_count": 5000000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.0059682,
+          "elapsed_seconds": 73.365
+        },
+        {
+          "trial": 2,
+          "ev": -0.0076439,
+          "elapsed_seconds": 73.355
+        },
+        {
+          "trial": 3,
+          "ev": -0.0065393,
+          "elapsed_seconds": 72.802
+        },
+        {
+          "trial": 4,
+          "ev": -0.0061956,
+          "elapsed_seconds": 72.834
+        },
+        {
+          "trial": 5,
+          "ev": -0.0067446,
+          "elapsed_seconds": 73.34
+        },
+        {
+          "trial": 6,
+          "ev": -0.005653,
+          "elapsed_seconds": 73.424
+        },
+        {
+          "trial": 7,
+          "ev": -0.0057922,
+          "elapsed_seconds": 73.139
+        },
+        {
+          "trial": 8,
+          "ev": -0.0053988,
+          "elapsed_seconds": 73.177
+        },
+        {
+          "trial": 9,
+          "ev": -0.0066193,
+          "elapsed_seconds": 73.837
+        },
+        {
+          "trial": 10,
+          "ev": -0.0058762,
+          "elapsed_seconds": 73.228
+        }
+      ],
+      "ev_mean": -0.00624311,
+      "ev_stdev": 0.00065995,
+      "ev_stdev_percent": 0.065995,
+      "ev_min": -0.0076439,
+      "ev_max": -0.0053988,
+      "ev_range": 0.0022451,
+      "ev_range_percent": 0.22451,
+      "converged": false
+    },
+    {
+      "hand_count": 10000000,
+      "trials": [
+        {
+          "trial": 1,
+          "ev": -0.00565275,
+          "elapsed_seconds": 146.636
+        },
+        {
+          "trial": 2,
+          "ev": -0.00594355,
+          "elapsed_seconds": 146.277
+        },
+        {
+          "trial": 3,
+          "ev": -0.0065542,
+          "elapsed_seconds": 146.388
+        },
+        {
+          "trial": 4,
+          "ev": -0.00564715,
+          "elapsed_seconds": 147.186
+        },
+        {
+          "trial": 5,
+          "ev": -0.0053633,
+          "elapsed_seconds": 147.09
+        },
+        {
+          "trial": 6,
+          "ev": -0.0067817,
+          "elapsed_seconds": 146.696
+        },
+        {
+          "trial": 7,
+          "ev": -0.0058274,
+          "elapsed_seconds": 146.782
+        },
+        {
+          "trial": 8,
+          "ev": -0.00595725,
+          "elapsed_seconds": 145.263
+        },
+        {
+          "trial": 9,
+          "ev": -0.00581615,
+          "elapsed_seconds": 145.698
+        },
+        {
+          "trial": 10,
+          "ev": -0.0049586,
+          "elapsed_seconds": 148.132
+        }
+      ],
+      "ev_mean": -0.0058502,
+      "ev_stdev": 0.00052677,
+      "ev_stdev_percent": 0.052677,
+      "ev_min": -0.0067817,
+      "ev_max": -0.0049586,
+      "ev_range": 0.0018231,
+      "ev_range_percent": 0.18231,
+      "converged": false
+    }
+  ],
+  "recommendation": {
+    "min_hands_for_convergence": null,
+    "threshold_used": 0.0001,
+    "threshold_percent": 0.01,
+    "note": "EV stdev did not drop below 0.01% at any tested hand count"
+  }
+}
