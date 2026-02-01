@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 5 - Web Interface ✓ COMPLETE
+**Current Stage:** Stage 6 - Split Implementation & Refinement ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -41,6 +41,20 @@ This simulator allows you to:
   - Download results as JSON or CSV
   - Deployment-ready with Procfile
   - 12 API endpoint tests
+- ✓ Stage 6: Split Implementation & Strategy Verification
+  - Complete split/re-split logic (up to 4 hands)
+  - Split aces handling (one card only, no re-split)
+  - Double after split support
+  - Individual hand tracking with bet/payout aggregation
+  - Debug mode with strategy categorization
+  - Action history tracking for verification
+  - EV calculations now accurate (~-0.5% for optimal basic strategy)
+
+**Next Steps:** (See [NEXT_STEPS.md](NEXT_STEPS.md) for details)
+- Enhanced visualizations (column charts, histograms)
+- Performance optimizations and progress tracking
+- Additional default strategies
+- AWS deployment preparation
 
 ## Installation
 
@@ -165,20 +179,34 @@ Then open [http://localhost:8000](http://localhost:8000) in your browser.
   - Shoe configuration (deck count, penetration, infinite shoe mode)
   - Simulation settings (number of hands, number of sessions)
   - Strategy selection (built-in strategies or custom)
+  - Debug mode for strategy verification
 - **Results Display**:
-  - Summary statistics (EV, win rate, total payout)
+  - Summary statistics (EV, win rate, total payout, split count)
   - Two interactive pie charts:
-    - Hand-level outcomes (blackjacks, doubles, regular wins/losses, surrenders, pushes)
+    - Hand-level outcomes (blackjacks, doubles, regular wins/losses, surrenders, pushes, splits)
     - Session-level outcomes (winning vs losing vs break-even sessions)
   - Hierarchical breakdown table with payout analysis
     - Shows wins/losses/pushes with indented sub-categories
     - Displays count, percentage, and total payout in units for each outcome type
+  - Debug mode output:
+    - Hands categorized by strategy situation (hard_12_vs_10, pair_8_vs_5, etc.)
+    - Initial 2-card hand for accurate strategy verification
+    - Complete action history for each hand
+    - Split hand details (each hand shown separately with actions, cards, bets, payouts)
+    - Dealer final value for comparison
   - Download results as JSON or CSV
 - **Strategy Editor**: Create and edit custom strategies
   - Visual table builder for defining strategies
   - Load existing strategies for modification
   - Save custom strategies as JSON files
   - Use custom strategies directly in simulations
+- **Split Hand Support**:
+  - Complete split/re-split logic (up to 4 hands)
+  - Split aces receive one card only (casino rules)
+  - Double after split (configurable)
+  - Individual tracking of each split hand
+  - Bet and payout aggregation across all hands
+  - 21 after split pays 1:1 (not blackjack 3:2)
 
 **API Endpoints:**
 - `GET /api/defaults` - Get default game parameters and available strategies
@@ -260,7 +288,24 @@ alhamood - 2026
 
 ## Version History
 
-- **v0.5 (Current)** - Stage 5: Web Interface - COMPLETE
+- **v0.6 (Current)** - Stage 6: Split Implementation & Strategy Verification - COMPLETE
+  - Complete split/re-split logic with up to 4 hands
+  - Split aces handling (one card only, correct casino rules)
+  - Double after split support (configurable)
+  - Individual hand tracking with bet/payout aggregation
+  - Action history tracking for each hand
+  - Debug mode with strategy categorization:
+    - Categorizes by initial 2-card hand (hard/soft/pair)
+    - Shows complete action sequence for each hand
+    - Split hands displayed separately with individual bets/payouts
+    - Dealer final value shown for comparison
+  - Fixed action tracking bugs:
+    - Actions now attributed to correct hand
+    - Records actual actions taken (not just requested)
+    - Both split hands properly show "split" action
+  - EV calculations now accurate (~-0.5% for optimal basic strategy vs previous -0.7%)
+
+- **v0.5** - Stage 5: Web Interface - COMPLETE
   - FastAPI backend with 5 REST endpoints (defaults, simulate, strategies list/detail)
   - Interactive web UI with comprehensive parameter control
   - Dual Chart.js visualizations:
