@@ -147,6 +147,7 @@ def categorize_hands_by_strategy(sessions_data: List[Dict]) -> Dict[str, List[Di
     """Categorize hand results by strategy situation for debugging.
 
     Returns a dictionary mapping strategy keys (e.g., "hard_10_vs_A") to lists of hand examples.
+    Uses INITIAL 2-card hand for categorization to verify strategy decisions.
     """
     categories = defaultdict(list)
 
@@ -155,45 +156,60 @@ def categorize_hands_by_strategy(sessions_data: List[Dict]) -> Dict[str, List[Di
             continue
 
         for hand in session['hands']:
-            # Skip if missing dealer upcard
-            if hand.get('dealer_upcard') is None:
+            # Skip if missing initial dealer upcard
+            if hand.get('initial_dealer_upcard') is None:
                 continue
 
             # Get dealer upcard
-            dealer_upcard = hand['dealer_upcard']
+            dealer_upcard = hand['initial_dealer_upcard']
             dealer_upcard_str = 'A' if dealer_upcard == 1 else str(dealer_upcard)
 
-            # Get player hand info
-            player_value = hand['player_value']
-            player_soft = hand['player_soft']
-            player_pair = hand['player_pair']
-            player_blackjack = hand['player_blackjack']
+            # Get INITIAL player hand info (first 2 cards)
+            initial_value = hand.get('initial_player_value')
+            initial_soft = hand.get('initial_player_soft')
+            initial_pair = hand.get('initial_player_pair')
+            player_blackjack = hand.get('player_blackjack')
 
-            # Determine hand type and create key
+            if initial_value is None:
+                continue
+
+            # Determine hand type and create key based on INITIAL hand
             if player_blackjack:
                 key = f"blackjack_vs_{dealer_upcard_str}"
-            elif player_pair and len(hand.get('player_cards', [])) == 2:
+            elif initial_pair and len(hand.get('initial_player_cards', [])) == 2:
                 # Get the rank of the paired card
-                card_str = hand['player_cards'][0][:hand['player_cards'][0].find(hand['player_cards'][0][-1])]
-                if card_str == '1':  # Ace
+                card_str = hand['initial_player_cards'][0]
+                # Extract rank (remove suit character at end)
+                if card_str.startswith('10'):
+                    card_str = '10'
+                else:
+                    card_str = card_str[0]
+                if card_str == '1':  # Ace represented as 1
                     card_str = 'A'
                 key = f"pair_{card_str}_vs_{dealer_upcard_str}"
-            elif player_soft:
-                key = f"soft_{player_value}_vs_{dealer_upcard_str}"
+            elif initial_soft:
+                key = f"soft_{initial_value}_vs_{dealer_upcard_str}"
             else:
-                key = f"hard_{player_value}_vs_{dealer_upcard_str}"
+                key = f"hard_{initial_value}_vs_{dealer_upcard_str}"
 
-            # Store hand example (already in correct format)
+            # Store hand example with BOTH initial and final states
             categories[key].append({
-                'player_cards': hand.get('player_cards', []),
-                'player_value': player_value,
-                'player_soft': player_soft,
-                'player_pair': player_pair,
+                'initial_cards': hand.get('initial_player_cards', []),
+                'initial_value': initial_value,
+                'initial_soft': initial_soft,
+                'initial_pair': initial_pair,
                 'dealer_upcard': dealer_upcard_str,
-                'dealer_value': hand['dealer_value'],
+                'actions': hand.get('actions', []),
+                'final_cards': hand.get('final_player_cards', []),
+                'final_value': hand.get('final_player_value'),
+                'dealer_value': hand.get('dealer_value'),
                 'outcome': hand['outcome'],
                 'bet': hand['bet'],
-                'payout': hand['payout']
+                'payout': hand['payout'],
+                'split_hands_count': hand.get('split_hands_count', 1),
+                'split_hands_final': hand.get('split_hands_final', []),
+                'split_bets': hand.get('split_bets', []),
+                'split_payouts': hand.get('split_payouts', [])
             })
 
     # Convert defaultdict to regular dict and limit examples per category
@@ -385,7 +401,8 @@ async def run_simulation(request: SimulationRequest):
                 'blackjack_count': result.blackjack_count,
                 'bust_count': result.bust_count,
                 'surrender_count': result.surrender_count,
-                'double_count': result.double_count
+                'double_count': result.double_count,
+                'split_count': result.split_count
             },
             'sessions': []
         }
@@ -405,7 +422,8 @@ async def run_simulation(request: SimulationRequest):
                 'blackjack_count': session.blackjack_count,
                 'bust_count': session.bust_count,
                 'surrender_count': session.surrender_count,
-                'double_count': session.double_count
+                'double_count': session.double_count,
+                'split_count': session.split_count
             }
 
             # Include hand data if tracked
@@ -413,17 +431,29 @@ async def run_simulation(request: SimulationRequest):
                 session_data['hands'] = [
                     {
                         'outcome': hand.outcome.name,
-                        'player_cards': [f"{c.rank}{c.suit[0]}" for c in hand.player_hand.cards],
-                        'player_value': hand.player_hand.value(),
-                        'player_soft': hand.player_hand.is_soft(),
-                        'player_pair': hand.player_hand.is_pair(),
+                        # Initial hand (for strategy verification)
+                        'initial_player_cards': [f"{c.rank}{c.suit[0]}" for c in hand.initial_player_hand.cards] if hand.initial_player_hand else [],
+                        'initial_player_value': hand.initial_player_hand.value() if hand.initial_player_hand else None,
+                        'initial_player_soft': hand.initial_player_hand.is_soft() if hand.initial_player_hand else None,
+                        'initial_player_pair': hand.initial_player_hand.is_pair() if hand.initial_player_hand else None,
+                        'initial_dealer_upcard': hand.initial_dealer_upcard,
+                        # Final hand (for outcome verification)
+                        'final_player_cards': [f"{c.rank}{c.suit[0]}" for c in hand.player_hand.cards],
+                        'final_player_value': hand.player_hand.value(),
+                        'final_player_soft': hand.player_hand.is_soft(),
                         'player_blackjack': hand.player_hand.is_blackjack(),
-                        'dealer_upcard': hand.dealer_hand.cards[0].rank if hand.dealer_hand.cards else None,
                         'dealer_value': hand.dealer_hand.value(),
                         'dealer_soft': hand.dealer_hand.is_soft(),
                         'dealer_blackjack': hand.dealer_hand.is_blackjack(),
+                        # Actions and outcome
+                        'actions': hand.actions if hand.actions else [],
                         'bet': round(hand.bet, 2),
-                        'payout': round(hand.payout, 2)
+                        'payout': round(hand.payout, 2),
+                        # Split information
+                        'split_hands_count': hand.split_hands_count,
+                        'split_bets': [round(b, 2) for b in hand.split_bets] if hand.split_bets else [],
+                        'split_payouts': [round(p, 2) for p in hand.split_payouts] if hand.split_payouts else [],
+                        'split_hands_final': hand.split_hands_final if hand.split_hands_final else []
                     }
                     for hand in session.hand_results
                 ]

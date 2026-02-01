@@ -462,20 +462,29 @@ function updateStatsTable(summary) {
 
         { label: 'Pushes', count: summary.push_count, payout: 0, indent: false },
         { label: 'Double Pushes', count: Math.max(0, estimatedDoublePushes), payout: 0, indent: true },
-        { label: 'Regular Pushes', count: Math.max(0, regularPushes), payout: 0, indent: true }
+        { label: 'Regular Pushes', count: Math.max(0, regularPushes), payout: 0, indent: true },
+
+        { label: '---', count: 0, payout: 0, indent: false, separator: true },
+        { label: 'Splits', count: summary.split_count || 0, payout: 0, indent: false }
     ];
 
     stats.forEach(stat => {
         const row = document.createElement('tr');
-        const percentage = ((stat.count / totalHands) * 100).toFixed(2);
-        const indentClass = stat.indent ? 'class="indent"' : '';
 
-        row.innerHTML = `
-            <td ${indentClass}>${stat.label}</td>
-            <td>${stat.count.toLocaleString()}</td>
-            <td>${percentage}%</td>
-            <td>${stat.payout >= 0 ? '+' : ''}${stat.payout.toFixed(2)}</td>
-        `;
+        // Handle separator rows
+        if (stat.separator) {
+            row.innerHTML = `<td colspan="4" style="border-top: 1px solid #ddd;"></td>`;
+        } else {
+            const percentage = ((stat.count / totalHands) * 100).toFixed(2);
+            const indentClass = stat.indent ? 'class="indent"' : '';
+
+            row.innerHTML = `
+                <td ${indentClass}>${stat.label}</td>
+                <td>${stat.count.toLocaleString()}</td>
+                <td>${percentage}%</td>
+                <td>${stat.payout >= 0 ? '+' : ''}${stat.payout.toFixed(2)}</td>
+            `;
+        }
 
         tbody.appendChild(row);
     });
@@ -517,13 +526,43 @@ function displayDebugInfo(debug) {
         const examples = strategyExamples[key];
         const row = document.createElement('tr');
 
-        // Format examples
+        // Format examples with action history and split info
         const examplesList = examples.map(ex => {
-            const cards = ex.player_cards.join(' ');
-            const soft = ex.player_soft ? 's' : '';
-            const pair = ex.player_pair ? 'P' : '';
-            return `${cards} (${ex.player_value}${soft}${pair}) vs ${ex.dealer_upcard} → ${ex.outcome} (${ex.payout >= 0 ? '+' : ''}${ex.payout})`;
-        }).join('<br>');
+            const initialCards = ex.initial_cards.join(' ');
+            const soft = ex.initial_soft ? 's' : '';
+            const pair = ex.initial_pair ? 'P' : '';
+
+            let result = `<strong>${initialCards}</strong> (${ex.initial_value}${soft}${pair}) vs ${ex.dealer_upcard}<br>`;
+
+            // Display split hands separately
+            if (ex.split_hands_count && ex.split_hands_count > 1 && ex.split_hands_final && ex.split_hands_final.length > 0) {
+                // Show each split hand on its own line
+                ex.split_hands_final.forEach((hand, idx) => {
+                    const handCards = hand.cards.join(' ');
+                    const handValue = hand.value;
+                    const handSoft = hand.soft ? 's' : '';
+                    const handBust = hand.bust ? ' BUST' : '';
+                    const handActions = hand.actions && hand.actions.length > 0 ? hand.actions.join(' → ') : 'stand';
+                    const bet = ex.split_bets[idx];
+                    const payout = ex.split_payouts[idx];
+
+                    result += `  <span style="color: #2196f3;">Hand ${idx}:</span> ${handActions} → ${handCards} (${handValue}${handSoft}${handBust}) | Bet: ${bet} | Payout: ${payout >= 0 ? '+' : ''}${payout}<br>`;
+                });
+
+                // Add dealer final value
+                result += `  <strong>Dealer:</strong> ${ex.dealer_value}<br>`;
+                result += `  <strong>Total:</strong> Bet: ${ex.bet} | Payout: ${ex.payout >= 0 ? '+' : ''}${ex.payout} | Outcome: ${ex.outcome}`;
+            } else {
+                // Non-split hand - original format
+                const actions = ex.actions && ex.actions.length > 0 ? ex.actions.join(' → ') : 'stand';
+                const finalCards = ex.final_cards.join(' ');
+                result += `  Actions: <em>${actions}</em><br>` +
+                         `  Final: ${finalCards} (${ex.final_value}) | Dealer: ${ex.dealer_value}<br>` +
+                         `  Outcome: ${ex.outcome} (${ex.payout >= 0 ? '+' : ''}${ex.payout})`;
+            }
+
+            return result;
+        }).join('<br><br>');
 
         row.innerHTML = `
             <td><code>${key}</code></td>

@@ -31,6 +31,7 @@ class SessionResult:
         bust_count: Number of player busts
         surrender_count: Number of surrenders
         double_count: Number of doubles
+        split_count: Number of times player split
         hand_results: Optional list of individual hand results (for sampling/export)
     """
     hands_played: int = 0
@@ -42,6 +43,7 @@ class SessionResult:
     bust_count: int = 0
     surrender_count: int = 0
     double_count: int = 0
+    split_count: int = 0
     hand_results: List[GameResult] = field(default_factory=list)
 
     @property
@@ -76,6 +78,7 @@ class SimulationResult:
         bust_count: Total player busts
         surrender_count: Total surrenders
         double_count: Total doubles
+        split_count: Total splits
     """
     total_hands: int = 0
     total_payout: float = 0.0
@@ -87,6 +90,7 @@ class SimulationResult:
     bust_count: int = 0
     surrender_count: int = 0
     double_count: int = 0
+    split_count: int = 0
 
     @property
     def ev_per_hand(self) -> float:
@@ -239,9 +243,13 @@ class Simulator:
             if result.payout == -0.5:
                 session.surrender_count += 1
 
-            # Track doubles (bet is 2.0)
-            if result.bet == 2.0:
+            # Track doubles (bet is 2.0 or contains double in actions)
+            if result.bet == 2.0 or any('double' in action for action in result.actions):
                 session.double_count += 1
+
+            # Track splits (split_hands_count > 1)
+            if result.split_hands_count > 1:
+                session.split_count += 1
 
             # Store hand result if tracking is enabled
             if track_hands and len(session.hand_results) < max_tracked_hands:
@@ -310,6 +318,7 @@ class Simulator:
             result.bust_count += session.bust_count
             result.surrender_count += session.surrender_count
             result.double_count += session.double_count
+            result.split_count += session.split_count
 
         return result
 
