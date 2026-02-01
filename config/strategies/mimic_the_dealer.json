@@ -1,0 +1,60 @@
+{
+  "name": "Mimic the Dealer",
+  "description": "Play exactly like the dealer: hit on hard 16 or less, hit on soft 17, stand on hard 17+. No doubles, splits, or surrenders.",
+  "rules": {
+    "decks": "any",
+    "dealer_hits_soft_17": "any",
+    "surrender_allowed": "any",
+    "double_after_split": "any",
+    "blackjack_payout": "any",
+    "notes": "Baseline comparison strategy - expected EV around -5.5%"
+  },
+  "strategy": {
+    "hard_totals": {
+      "5":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "6":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "7":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "8":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "9":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "10": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "11": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "12": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "13": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "14": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "15": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "16": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "17": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "18": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "19": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "20": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "21": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"}
+    },
+    "soft_totals": {
+      "13": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "14": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "15": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "16": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "17": {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "18": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "19": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "20": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "21": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"}
+    },
+    "pairs": {
+      "2":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "3":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "4":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "5":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "6":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "7":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "8":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"},
+      "9":  {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "10": {"2": "stand", "3": "stand", "4": "stand", "5": "stand", "6": "stand", "7": "stand", "8": "stand", "9": "stand", "10": "stand", "A": "stand"},
+      "A":  {"2": "hit", "3": "hit", "4": "hit", "5": "hit", "6": "hit", "7": "hit", "8": "hit", "9": "hit", "10": "hit", "A": "hit"}
+    }
+  },
+  "action_codes": {
+    "hit": "Take another card",
+    "stand": "End turn with current hand"
+  }
+}
