@@ -52,18 +52,16 @@ This document outlines planned enhancements and deployment steps for the blackja
   - Extrapolate to full simulation size
   - Display estimated time to user
 
-### Progress Bar
-- Real-time progress indicator for long simulations
-- Show percentage complete
-- Show estimated time remaining
-- Allow cancellation of running simulations
-- Consider WebSocket for live updates vs polling
+### Estimated Time Display (Future Enhancement)
+**Note**: Progress bar with real-time updates proved problematic (memory overhead, complexity).
+Alternative simpler approach:
+- Before starting simulation, run small sample (e.g., 100-1000 hands)
+- Time the sample execution
+- Calculate and display estimated total time
+- Simple "Please wait..." message during execution
+- No streaming/chunking complexity
 
-### Technical Implementation
-- Backend: Streaming response with progress updates
-- Frontend: Progress bar component (HTML5 progress element or custom)
-- Consider chunking large simulations (e.g., 10k hands at a time)
-- Return partial results as they complete
+**Deferred**: Real-time progress updates add significant complexity and memory overhead for marginal UX benefit. Keep simulations simple and fast.
 
 ## Priority 3: Additional Strategies
 
