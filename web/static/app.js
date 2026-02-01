@@ -170,9 +170,9 @@ function validatePayloadSilent(payload) {
     const numSessions = payload.simulation.num_sessions;
     const actualTotalHands = handsPerSession * numSessions;
 
-    if (handsPerSession < 100 || handsPerSession > 1000000) return false;
-    if (numSessions < 1 || numSessions > 10000) return false;
-    if (actualTotalHands > 10000000) return false;
+    if (handsPerSession < 100 || handsPerSession > 10000000) return false;
+    if (numSessions < 1 || numSessions > 100000) return false;
+    if (actualTotalHands > 100000000) return false;
     return true;
 }
 
@@ -280,18 +280,18 @@ function validatePayload(payload) {
     const numSessions = payload.simulation.num_sessions;
     const actualTotalHands = handsPerSession * numSessions;
 
-    if (handsPerSession < 100 || handsPerSession > 1000000) {
-        showError('Hands per session must be between 100 and 1,000,000');
+    if (handsPerSession < 100 || handsPerSession > 10000000) {
+        showError('Hands per session must be between 100 and 10,000,000');
         return false;
     }
-    if (numSessions < 1 || numSessions > 10000) {
-        showError('Number of sessions must be between 1 and 10,000');
+    if (numSessions < 1 || numSessions > 100000) {
+        showError('Number of sessions must be between 1 and 100,000');
         return false;
     }
 
-    // Reasonable limit on total computation (10 million total hands)
-    if (actualTotalHands > 10000000) {
-        showError(`Total hands (${formatNumber(actualTotalHands)}) exceeds limit of 10,000,000. Reduce hands per session or number of sessions.`);
+    // Reasonable limit on total computation (100 million total hands)
+    if (actualTotalHands > 100000000) {
+        showError(`Total hands (${formatNumber(actualTotalHands)}) exceeds limit of 100,000,000. Reduce hands per session or number of sessions.`);
         return false;
     }
 
@@ -361,13 +361,15 @@ function createHandOutcomeChart(results) {
     const combined = categories.labels.map((label, i) => ({
         label: label,
         data: categories.data[i],
-        color: categories.colors[i]
+        color: categories.colors[i],
+        payout: categories.payouts[i]
     }));
     combined.sort((a, b) => b.data - a.data);
 
     const sortedLabels = combined.map(item => item.label);
     const sortedData = combined.map(item => item.data);
     const sortedColors = combined.map(item => item.color);
+    const sortedPayouts = combined.map(item => item.payout);
 
     handOutcomeChart = new Chart(ctx, {
         type: 'bar',
@@ -393,7 +395,11 @@ function createHandOutcomeChart(results) {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed.y / total) * 100).toFixed(2);
-                            return `${context.parsed.y.toLocaleString()} hands (${percentage}%)`;
+                            const payout = sortedPayouts[context.dataIndex];
+                            return [
+                                `${context.parsed.y.toLocaleString()} hands (${percentage}%)`,
+                                `Est. payout: ${formatAbbreviated(payout)} units`
+                            ];
                         }
                     }
                 }
@@ -417,6 +423,27 @@ function createHandOutcomeChart(results) {
                         text: 'Outcome Type'
                     }
                 }
+            },
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+
+                    chart.data.datasets[0].data.forEach((value, index) => {
+                        if (value === 0) return;
+                        const meta = chart.getDatasetMeta(0);
+                        const bar = meta.data[index];
+                        const payout = sortedPayouts[index];
+                        const label = formatAbbreviated(payout);
+
+                        ctx.fillStyle = payout >= 0 ? '#1a7a3a' : '#a82020';
+                        ctx.fillText(label, bar.x, bar.y - 4);
+                    });
+                    ctx.restore();
+                }
             }
         }
     });
@@ -433,6 +460,9 @@ function createSessionOutcomeChart(results) {
 
     // Create histogram data from session payouts
     const histogramData = createSessionHistogram(results);
+
+    // Store binPayouts for the datalabels plugin
+    const binPayouts = histogramData.binPayouts;
 
     sessionOutcomeChart = new Chart(ctx, {
         type: 'bar',
@@ -459,7 +489,11 @@ function createSessionOutcomeChart(results) {
                             const sessions = context.parsed.y;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((sessions / total) * 100).toFixed(1);
-                            return `${sessions} sessions (${percentage}%)`;
+                            const payout = binPayouts[context.dataIndex];
+                            return [
+                                `${sessions} sessions (${percentage}%)`,
+                                `Total payout: ${formatAbbreviated(payout)} units`
+                            ];
                         }
                     }
                 }
@@ -481,6 +515,27 @@ function createSessionOutcomeChart(results) {
                         text: 'Session Payout (units)'
                     }
                 }
+            },
+            animation: {
+                onComplete: function() {
+                    const chart = this;
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'center';
+
+                    chart.data.datasets[0].data.forEach((value, index) => {
+                        if (value === 0) return;
+                        const meta = chart.getDatasetMeta(0);
+                        const bar = meta.data[index];
+                        const payout = binPayouts[index];
+                        const label = formatAbbreviated(payout);
+
+                        ctx.fillStyle = payout >= 0 ? '#1a7a3a' : '#a82020';
+                        ctx.fillText(label, bar.x, bar.y - 4);
+                    });
+                    ctx.restore();
+                }
             }
         }
     });
@@ -489,6 +544,7 @@ function createSessionOutcomeChart(results) {
 // Analyze hand outcomes from results (uses summary stats from ALL sessions)
 function analyzeHandOutcomes(results) {
     const summary = results.summary;
+    const bjPayout = parseFloat(document.getElementById('blackjack_payout').value) || 1.5;
 
     // Estimate breakdown from summary statistics
     // Note: Doubles overlap with wins/losses, so we estimate the split
@@ -504,10 +560,19 @@ function analyzeHandOutcomes(results) {
             summary.blackjack_count,
             estimatedDoubleWins,
             estimatedDoubleLosses,
-            Math.max(0, regularWins), // Ensure non-negative
+            Math.max(0, regularWins),
             Math.max(0, regularLosses),
             summary.surrender_count,
             summary.push_count
+        ],
+        payouts: [
+            summary.blackjack_count * bjPayout,
+            estimatedDoubleWins * 2,
+            -estimatedDoubleLosses * 2,
+            Math.max(0, regularWins),
+            -Math.max(0, regularLosses),
+            -summary.surrender_count * 0.5,
+            0
         ],
         colors: [
             '#f39c12',  // Orange for blackjacks
@@ -560,66 +625,98 @@ function analyzeSessionOutcomes(results) {
     return { labels, data };
 }
 
+// Format a number in abbreviated form (e.g. +1.2k, -340)
+function formatAbbreviated(value) {
+    const abs = Math.abs(value);
+    const sign = value < 0 ? '-' : '+';
+    if (abs >= 1000000) {
+        return `${sign}${(abs / 1000000).toFixed(1)}M`;
+    } else if (abs >= 1000) {
+        return `${sign}${(abs / 1000).toFixed(1)}k`;
+    } else {
+        return `${sign}${abs.toFixed(0)}`;
+    }
+}
+
 // Create histogram data from session payouts
 function createSessionHistogram(results) {
     if (!results.sessions || results.sessions.length === 0) {
-        return { labels: [], data: [], colors: [] };
+        return { labels: [], data: [], colors: [], binPayouts: [] };
     }
 
-    // Extract session payouts
     const payouts = results.sessions.map(s => s.total_payout);
-
-    // Calculate range and bin size
     const min = Math.min(...payouts);
     const max = Math.max(...payouts);
-    const range = max - min;
-
-    // Use Sturges' rule for number of bins: k = ceil(log2(n) + 1)
-    // But cap between 10 and 30 bins for readability
     const n = payouts.length;
-    const numBins = Math.min(30, Math.max(10, Math.ceil(Math.log2(n) + 1)));
-    const binSize = range / numBins;
+    const targetBins = Math.min(30, Math.max(10, Math.ceil(Math.log2(n) + 1)));
 
-    // Create bins
+    // Build bin edges with 0 as a mandatory boundary
+    let edges;
+    if (min >= 0) {
+        // All non-negative
+        const binSize = (max - min) / targetBins || 1;
+        edges = [];
+        for (let i = 0; i <= targetBins; i++) edges.push(min + i * binSize);
+    } else if (max <= 0) {
+        // All non-positive
+        const binSize = (max - min) / targetBins || 1;
+        edges = [];
+        for (let i = 0; i <= targetBins; i++) edges.push(min + i * binSize);
+    } else {
+        // Mixed: split bins proportionally on each side of 0
+        const negRange = -min;
+        const posRange = max;
+        const totalRange = negRange + posRange;
+        const negBins = Math.max(1, Math.round(targetBins * (negRange / totalRange)));
+        const posBins = Math.max(1, targetBins - negBins);
+        const negBinSize = negRange / negBins;
+        const posBinSize = posRange / posBins;
+
+        edges = [];
+        for (let i = 0; i <= negBins; i++) edges.push(min + i * negBinSize);
+        for (let i = 1; i <= posBins; i++) edges.push(i * posBinSize);
+    }
+
+    const numBins = edges.length - 1;
     const bins = new Array(numBins).fill(0);
+    const binPayouts = new Array(numBins).fill(0);
     const binLabels = [];
     const binColors = [];
 
-    // Generate bin labels and colors
     for (let i = 0; i < numBins; i++) {
-        const binStart = min + (i * binSize);
-        const binEnd = min + ((i + 1) * binSize);
+        const binStart = edges[i];
+        const binEnd = edges[i + 1];
         const binMid = (binStart + binEnd) / 2;
 
-        // Create label (show range for first/last, midpoint for others)
-        if (i === 0) {
-            binLabels.push(`< ${binEnd.toFixed(1)}`);
-        } else if (i === numBins - 1) {
-            binLabels.push(`≥ ${binStart.toFixed(1)}`);
-        } else {
-            binLabels.push(binMid.toFixed(1));
-        }
+        binLabels.push(binMid.toFixed(1));
 
-        // Color based on profitability
-        if (binMid > 0) {
+        if (binStart >= 0) {
             binColors.push('#27ae60');  // Green for winning
-        } else if (binMid < 0) {
+        } else if (binEnd <= 0) {
             binColors.push('#e74c3c');  // Red for losing
         } else {
-            binColors.push('#3498db');  // Blue for break-even
+            binColors.push('#3498db');  // Blue for exact zero boundary
         }
     }
 
-    // Count sessions in each bin
+    // Count sessions and sum payouts per bin
     payouts.forEach(payout => {
-        const binIndex = Math.min(numBins - 1, Math.floor((payout - min) / binSize));
-        bins[binIndex]++;
+        let idx = numBins - 1;
+        for (let i = 0; i < numBins; i++) {
+            if (payout < edges[i + 1] || i === numBins - 1) {
+                idx = i;
+                break;
+            }
+        }
+        bins[idx]++;
+        binPayouts[idx] += payout;
     });
 
     return {
         labels: binLabels,
         data: bins,
-        colors: binColors
+        colors: binColors,
+        binPayouts: binPayouts
     };
 }
 

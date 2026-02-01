@@ -36,28 +36,27 @@ This document outlines planned enhancements and deployment steps for the blackja
 - Stacked vertically for easy comparison
 - Responsive design maintained
 
-## Priority 2: Performance & UX Improvements
+## Priority 2: Performance & UX Improvements ✓ COMPLETE
 
-### Remove Hand Count Limit
-- **Current**: Hard limit preventing very large simulations
-- **Target**: Remove limit but add intelligent warnings
+### Performance Optimization ✓ COMPLETE (Stage 9)
+- 1.57x simulation speedup (50K hands: 1.13s → 0.72s, ~70K hands/sec)
+- Card: pre-computed `_value`/`is_ace`, `__slots__`, frozenset validation
+- Hand: cached value/soft with dirty-flag invalidation in `_recalculate()`
+- Shoe: reuse Card objects across reshuffles, integer threshold comparison
+- Input limits increased 10x (10M hands/session, 100K sessions, 100M total)
 
-### Warning System
-- Show warning text when hand count exceeds ~1M hands
-- Warning should include estimated run time
-- For now, use simple threshold-based warning
-- Future: Implement adaptive estimation:
-  - Run small sample (e.g., 1000 hands) on simulation start
-  - Time the sample execution
-  - Extrapolate to full simulation size
-  - Display estimated time to user
+### Chart Enhancements ✓ COMPLETE (Stage 9)
+- Session histogram always breaks at 0 boundary (clean red/green separation)
+- Payout labels on both charts (abbreviated format: +1.2k, -340)
+- Tooltips include total payout per bin/category
 
-### Estimated Time Display ✓ COMPLETE
+### Estimated Time Display ✓ COMPLETE (Stage 8)
 - Calibration-based estimation: runs small sample, extrapolates linearly
 - Shown inline next to total hands count in config panel
 - Updates automatically when parameters change (debounced)
 - `/api/estimate` endpoint for pre-simulation prediction
-- Accuracy: ~1-3% error in testing
+- Calibration: 5K hands (single-session), 10-50 sessions (multi-session)
+- Accuracy: <1% error in testing
 - Elapsed time shown in results (stat card + CLI summary)
 - Best/worst session stats added to session statistics table
 

@@ -61,8 +61,8 @@ class SimulationConfig(BaseModel):
     Note: total_hands represents hands PER SESSION.
     Actual total = total_hands × num_sessions.
     """
-    total_hands: int = Field(default=100, ge=100, le=1000000, description="Hands per session")
-    num_sessions: int = Field(default=1000, ge=1, le=10000, description="Number of sessions")
+    total_hands: int = Field(default=100, ge=100, le=10000000, description="Hands per session")
+    num_sessions: int = Field(default=1000, ge=1, le=100000, description="Number of sessions")
     strategy: str = "basic_strategy_h17"
     track_hands: bool = False
     debug_mode: bool = False
@@ -71,12 +71,12 @@ class SimulationConfig(BaseModel):
     @field_validator('num_sessions')
     @classmethod
     def validate_total_hands_limit(cls, v, info):
-        """Ensure total hands (hands_per_session × num_sessions) doesn't exceed 10M."""
+        """Ensure total hands (hands_per_session × num_sessions) doesn't exceed 100M."""
         hands_per_session = info.data.get('total_hands')
-        if hands_per_session and (hands_per_session * v) > 10000000:
+        if hands_per_session and (hands_per_session * v) > 100000000:
             raise ValueError(
                 f'Total hands ({hands_per_session:,} × {v:,} = {hands_per_session * v:,}) '
-                f'exceeds limit of 10,000,000'
+                f'exceeds limit of 100,000,000'
             )
         return v
 

@@ -22,6 +22,9 @@ class Hand:
     def __init__(self):
         """Initialize an empty hand."""
         self.cards: List[Card] = []
+        self._cached_value: int = 0
+        self._cached_soft: bool = False
+        self._dirty: bool = False
 
     def add_card(self, card: Card):
         """
@@ -31,6 +34,28 @@ class Hand:
             card: The card to add
         """
         self.cards.append(card)
+        self._dirty = True
+
+    def _recalculate(self):
+        """Recalculate cached value and soft flag."""
+        total = 0
+        aces = 0
+
+        for card in self.cards:
+            if card.is_ace:
+                aces += 1
+                total += 11
+            else:
+                total += card._value
+
+        while total > 21 and aces > 0:
+            total -= 10
+            aces -= 1
+
+        self._cached_value = total
+        # Hand is soft if at least one ace is still counted as 11
+        self._cached_soft = aces > 0
+        self._dirty = False
 
     def value(self) -> int:
         """
@@ -38,31 +63,10 @@ class Hand:
 
         Returns:
             The highest value <= 21, or lowest value if all bust
-
-        Rules:
-        - Aces are worth 11 if that doesn't bust, otherwise 1
-        - Multiple aces: at most one ace can be counted as 11
         """
-        if not self.cards:
-            return 0
-
-        total = 0
-        aces = 0
-
-        # Count all cards, treating aces as 11 initially
-        for card in self.cards:
-            if card.rank == 'A':
-                aces += 1
-                total += 11
-            else:
-                total += card.value()
-
-        # Adjust aces from 11 to 1 if necessary to avoid bust
-        while total > 21 and aces > 0:
-            total -= 10  # Convert one ace from 11 to 1
-            aces -= 1
-
-        return total
+        if self._dirty:
+            self._recalculate()
+        return self._cached_value
 
     def is_soft(self) -> bool:
         """
@@ -73,17 +77,9 @@ class Hand:
         """
         if not self.cards:
             return False
-
-        # A hand is soft if it has an ace and treating it as 11 doesn't bust
-        has_ace = any(card.rank == 'A' for card in self.cards)
-        if not has_ace:
-            return False
-
-        # Calculate value treating all aces as 1
-        total_hard = sum(1 if card.rank == 'A' else card.value() for card in self.cards)
-
-        # If we can add 10 (treat one ace as 11) without busting, it's soft
-        return (total_hard + 10) <= 21
+        if self._dirty:
+            self._recalculate()
+        return self._cached_soft
 
     def is_bust(self) -> bool:
         """
@@ -92,7 +88,9 @@ class Hand:
         Returns:
             True if hand value exceeds 21
         """
-        return self.value() > 21
+        if self._dirty:
+            self._recalculate()
+        return self._cached_value > 21
 
     def is_blackjack(self) -> bool:
         """
@@ -128,6 +126,9 @@ class Hand:
     def clear(self):
         """Remove all cards from the hand."""
         self.cards = []
+        self._cached_value = 0
+        self._cached_soft = False
+        self._dirty = False
 
     def __len__(self) -> int:
         """Return the number of cards in the hand."""

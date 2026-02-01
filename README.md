@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 8 - Time Estimation & Reporting ✓ COMPLETE
+**Current Stage:** Stage 9 - Performance Optimization & Chart Enhancements ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -64,8 +64,14 @@ This simulator allows you to:
   - `/api/estimate` endpoint for time prediction
   - Fixed 45MB response overhead from unnecessary hand tracking
 
+- ✓ Stage 9: Performance Optimization & Chart Enhancements
+  - 1.57x simulation speedup via Card/Hand/Shoe optimizations
+  - Session histogram with mandatory zero boundary (clean red/green separation)
+  - Payout labels on both charts (abbreviated format: +1.2k, -340)
+  - Input limits increased 10x (up to 100M total hands)
+  - Improved time estimation accuracy (<1% error)
+
 **Next Steps:** (See [NEXT_STEPS.md](NEXT_STEPS.md) for details)
-- Performance optimizations to enable larger simulations
 - Additional default strategies (card counting, conservative variants)
 - Strategy editor validation and improvements
 - AWS deployment preparation
@@ -308,10 +314,21 @@ alhamood - 2026
 - **Stage 6**: Split Implementation & Strategy Verification ✓
 - **Stage 7**: Enhanced Visualizations (bar charts, histograms, session statistics) ✓
 - **Stage 8**: Time Estimation & Reporting ✓
+- **Stage 9**: Performance Optimization & Chart Enhancements ✓
 
 ## Version History
 
-- **v0.8 (Current)** - Stage 8: Time Estimation & Reporting - COMPLETE
+- **v0.9 (Current)** - Stage 9: Performance Optimization & Chart Enhancements - COMPLETE
+  - 1.57x simulation speedup (50K hands: 1.13s → 0.72s, ~70K hands/sec)
+    - Card: pre-computed numeric values, `__slots__`, frozenset validation
+    - Hand: cached value/soft calculations with dirty-flag invalidation
+    - Shoe: reuse Card objects across reshuffles, integer threshold comparison
+  - Session histogram always breaks at 0 (no mixed win/loss bins)
+  - Payout labels on both charts (abbreviated format above bars + in tooltips)
+  - Input limits increased 10x: 10M hands/session, 100K sessions, 100M total
+  - Time estimation calibration increased (5K hands / 10-50 sessions) for <1% accuracy
+
+- **v0.8** - Stage 8: Time Estimation & Reporting - COMPLETE
   - Pre-simulation time estimates: calibration-based prediction shown inline next to total hands
   - Elapsed time reporting in results summary (stat card + CLI output)
   - New `/api/estimate` endpoint for time prediction before simulation starts

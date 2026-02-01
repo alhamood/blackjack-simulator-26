@@ -1,7 +1,7 @@
 # Blackjack Simulator - Project Context
 
 **Last Updated:** 2026-01-31
-**Project Status:** Stage 8 - Time Estimation & Reporting (COMPLETE)
+**Project Status:** Stage 9 - Performance Optimization & Chart Enhancements (COMPLETE)
 **Repository:** Private GitHub repository (alhamood/blackjack-simulator-26)
 
 ---
@@ -358,6 +358,45 @@ blackjack-simulator-26/
 - `web/static/index.html` - time-estimate span, elapsed-time stat card
 - `web/static/styles.css` - .time-estimate styling
 - `demo_simulator.py` - demo_time_estimation()
+
+### Stage 9: Performance Optimization & Chart Enhancements (COMPLETE)
+**Status**: ✓ COMPLETE (2026-01-31)
+**Goal**: Optimize simulation performance for larger runs; improve chart visualizations
+
+**Performance Optimizations (1.57x speedup):**
+- ✓ `Card`: Pre-computed `_value` int and `is_ace` bool in `__init__` (eliminates repeated string comparisons)
+  - Added `__slots__` for memory efficiency, `frozenset` for validation, `_RANK_VALUES` dict lookup
+- ✓ `Hand`: Cached `value()` and `is_soft()` with dirty-flag invalidation on `add_card()`
+  - Single `_recalculate()` computes both value and soft flag in one pass
+  - `is_bust()` returns cached value directly (no re-traversal)
+- ✓ `Shoe`: Card objects built once in `_master_cards`, reused across reshuffles (copy + shuffle only)
+  - Penetration check uses pre-computed integer threshold (`cards_dealt >= threshold`)
+  - Infinite shoe skips shuffle tracking entirely
+- ✓ Results: 50K hands in 0.72s (was 1.13s), ~70K hands/sec throughput
+
+**Chart Enhancements:**
+- ✓ Session histogram: bins always break at 0 boundary (no mixed win/loss bins)
+  - Proportional bin allocation on each side of 0
+  - Clean red/green color separation
+- ✓ Payout labels on both charts: abbreviated format (e.g. +1.2k, -340) above each bar
+  - Color-coded: green for positive, red for negative
+  - Tooltips also show total payout per bin/category
+- ✓ Hand outcome chart: payout labels using estimated payouts per category
+  - Uses blackjack payout value from form for accurate estimates
+
+**Limits & Estimation:**
+- ✓ Input limits increased 10x: hands per session up to 10M, sessions up to 100K, total up to 100M
+  - Updated across HTML, JS validation, and API validators
+- ✓ Calibration size increased: single-session 5K hands (was 1K), multi-session 10-50 sessions (was 3-10)
+  - Estimate accuracy improved to <1% error
+
+**Key files modified:**
+- `src/cards.py` - Card __slots__/pre-computed values, Shoe _master_cards/threshold optimization
+- `src/hand.py` - Cached value/soft with dirty flag, _recalculate()
+- `src/simulator.py` - Increased calibration defaults (5K hands, 10-50 sessions)
+- `web/api.py` - Increased field limits (10M hands, 100K sessions, 100M total)
+- `web/static/app.js` - Zero-boundary histogram, payout labels, increased validation limits
+- `web/static/index.html` - Increased max attributes on inputs
 
 ---
 

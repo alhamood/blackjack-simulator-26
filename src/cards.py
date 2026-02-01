@@ -16,6 +16,14 @@ class Card:
 
     RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
     SUITS = ['♠', '♥', '♦', '♣']
+    _RANK_VALUES = {
+        '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+        '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11,
+    }
+    _VALID_RANKS = frozenset(RANKS)
+    _VALID_SUITS = frozenset(SUITS)
+
+    __slots__ = ('rank', 'suit', '_value', 'is_ace')
 
     def __init__(self, rank: str, suit: str):
         """
@@ -25,13 +33,15 @@ class Card:
             rank: Card rank ('2'-'10', 'J', 'Q', 'K', 'A')
             suit: Card suit ('♠', '♥', '♦', '♣')
         """
-        if rank not in self.RANKS:
+        if rank not in self._VALID_RANKS:
             raise ValueError(f"Invalid rank: {rank}")
-        if suit not in self.SUITS:
+        if suit not in self._VALID_SUITS:
             raise ValueError(f"Invalid suit: {suit}")
 
         self.rank = rank
         self.suit = suit
+        self._value = self._RANK_VALUES[rank]
+        self.is_ace = rank == 'A'
 
     def value(self) -> int:
         """
@@ -40,12 +50,7 @@ class Card:
         Returns:
             Card value (2-10 for number cards, 10 for face cards, 11 for Ace)
         """
-        if self.rank in ['J', 'Q', 'K']:
-            return 10
-        elif self.rank == 'A':
-            return 11  # Aces are 11 by default; hand logic handles soft/hard
-        else:
-            return int(self.rank)
+        return self._value
 
     def __repr__(self) -> str:
         """String representation of the card."""
@@ -111,24 +116,27 @@ class Shoe:
         self.penetration = penetration
         self.infinite = infinite
 
-        self.cards: List[Card] = []
-        self._deck_template: List[Card] = []  # For infinite mode
+        # Build card objects once and reuse them across reshuffles
+        self._master_cards: List[Card] = []
+        for suit in Card.SUITS:
+            for rank in Card.RANKS:
+                card = Card(rank, suit)
+                for _ in range(num_decks):
+                    self._master_cards.append(card)
+
+        self.total_cards = len(self._master_cards)
+        self._shuffle_threshold = int(self.total_cards * self.penetration)
+        self.cards: List[Card] = self._master_cards.copy()
+        self._deck_template: List[Card] = self._master_cards  # For infinite mode
         self.cards_dealt = 0
-        self.total_cards = 0
 
-        self._build_shoe()
-
-    def _build_shoe(self):
-        """Build the shoe by combining multiple decks."""
-        self.cards = []
-        for _ in range(self.num_decks):
-            deck = Deck()
-            self.cards.extend(deck.cards)
-
-        # Store a template for infinite mode (one full shoe)
-        self._deck_template = self.cards.copy()
-        self.total_cards = len(self.cards)
         self.shuffle()
+
+    def _rebuild_and_shuffle(self):
+        """Reset the shoe by copying master cards and shuffling."""
+        self.cards = self._master_cards.copy()
+        self.cards_dealt = 0
+        random.shuffle(self.cards)
 
     def shuffle(self):
         """Shuffle the shoe and reset cards dealt counter."""
@@ -148,17 +156,11 @@ class Shoe:
         """
         if self.infinite:
             # Infinite deck: sample with replacement from template
-            card = random.choice(self._deck_template)
-            self.cards_dealt += 1
-            return card
+            return random.choice(self._deck_template)
         else:
             # Check if we need to reshuffle before dealing
-            if self.needs_shuffle():
-                self._build_shoe()  # Rebuild and reshuffle
-
-            # Normal deck: remove card from shoe
-            if not self.cards:
-                raise ValueError("Shoe is empty - should have been reshuffled")
+            if self.cards_dealt >= self._shuffle_threshold:
+                self._rebuild_and_shuffle()
 
             card = self.cards.pop()
             self.cards_dealt += 1
@@ -175,9 +177,7 @@ class Shoe:
         if self.infinite:
             return False  # Never needs shuffle in infinite mode
 
-        cards_remaining = len(self.cards)
-        dealt_fraction = self.cards_dealt / self.total_cards
-        return dealt_fraction >= self.penetration
+        return self.cards_dealt >= self._shuffle_threshold
 
     def cards_remaining(self) -> int:
         """

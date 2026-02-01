@@ -339,7 +339,7 @@ class Simulator:
         total_hands: int,
         strategy_func: Callable[[Hand, Card], PlayerAction],
         num_sessions: int = 1,
-        calibration_hands: int = 1000
+        calibration_hands: int = 5000
     ) -> float:
         """
         Estimate how long a simulation will take by running a small calibration.
@@ -353,7 +353,7 @@ class Simulator:
             total_hands: Total number of hands for the full simulation
             strategy_func: Strategy function to use
             num_sessions: Number of sessions for the full simulation
-            calibration_hands: Number of hands to use for calibration
+            calibration_hands: Number of hands to use for calibration (single-session)
 
         Returns:
             Estimated time in seconds
@@ -361,7 +361,7 @@ class Simulator:
         if num_sessions > 1:
             # Use same hands-per-session as the real run, but fewer sessions
             hands_per_session = total_hands // num_sessions
-            cal_sessions = max(3, min(num_sessions, 10))
+            cal_sessions = max(10, min(num_sessions, 50))
             cal_total = hands_per_session * cal_sessions
 
             start = time.perf_counter()
