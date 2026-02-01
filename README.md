@@ -14,7 +14,7 @@ This simulator allows you to:
 
 ## Project Status
 
-**Current Stage:** Stage 7 - Enhanced Visualizations ✓ COMPLETE
+**Current Stage:** Stage 8 - Time Estimation & Reporting ✓ COMPLETE
 
 **Completed:**
 - ✓ Stage 1: Foundation & Documentation
@@ -57,10 +57,17 @@ This simulator allows you to:
   - Color-coded charts for better visual distinction
   - Sturges' rule for optimal histogram binning
 
+- ✓ Stage 8: Time Estimation & Reporting
+  - Pre-simulation time estimates via calibration (shown inline in config)
+  - Elapsed time reporting in results (full server-side timing)
+  - Best/worst session stats in session statistics table
+  - `/api/estimate` endpoint for time prediction
+  - Fixed 45MB response overhead from unnecessary hand tracking
+
 **Next Steps:** (See [NEXT_STEPS.md](NEXT_STEPS.md) for details)
-- Strategy editor validation and improvements
-- Performance optimizations and progress tracking (remove hand limit, add warnings)
+- Performance optimizations to enable larger simulations
 - Additional default strategies (card counting, conservative variants)
+- Strategy editor validation and improvements
 - AWS deployment preparation
 
 ## Installation
@@ -300,10 +307,20 @@ alhamood - 2026
 - **Stage 5**: Web Interface (FastAPI backend, static frontend) ✓
 - **Stage 6**: Split Implementation & Strategy Verification ✓
 - **Stage 7**: Enhanced Visualizations (bar charts, histograms, session statistics) ✓
+- **Stage 8**: Time Estimation & Reporting ✓
 
 ## Version History
 
-- **v0.7 (Current)** - Stage 7: Enhanced Visualizations - COMPLETE
+- **v0.8 (Current)** - Stage 8: Time Estimation & Reporting - COMPLETE
+  - Pre-simulation time estimates: calibration-based prediction shown inline next to total hands
+  - Elapsed time reporting in results summary (stat card + CLI output)
+  - New `/api/estimate` endpoint for time prediction before simulation starts
+  - Best/worst session added to session statistics table
+  - Fixed performance bug: disabled unnecessary hand tracking that generated 45MB JSON responses
+  - Estimate accuracy: ~1-3% error via linear extrapolation from calibration run
+  - Full server-side timing (includes strategy loading and response building)
+
+- **v0.7** - Stage 7: Enhanced Visualizations - COMPLETE
   - Replaced pie charts with more informative visualizations:
     - Hand outcomes: Sorted descending bar chart
     - Session outcomes: Histogram with optimal binning (Sturges' rule)

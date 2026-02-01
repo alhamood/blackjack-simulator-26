@@ -213,11 +213,47 @@ def demo_different_game_rules():
     print()
 
 
+def demo_time_estimation():
+    """Demonstrate time estimation by calibrating with a small sample."""
+    print("=== Time Estimation Demo ===")
+    print()
+
+    basic = Strategy('config/strategies/basic_strategy_h17.json')
+    rules = GameRules(dealer_hits_soft_17=True, surrender_allowed=True)
+    sim = Simulator(rules=rules, infinite_shoe=True)
+
+    def strategy_func(player_hand, dealer_upcard):
+        can_double = len(player_hand) == 2
+        can_surrender = len(player_hand) == 2
+        can_split = player_hand.is_pair() and len(player_hand) == 2
+
+        return basic.get_action(
+            player_hand,
+            dealer_upcard,
+            can_double=can_double,
+            can_surrender=can_surrender,
+            can_split=can_split
+        )
+
+    target_hands = 100000
+
+    # Estimate time
+    estimate = sim.estimate_time(target_hands, strategy_func)
+    print(f"Estimated time for {target_hands:,} hands: {estimate:.2f} seconds")
+
+    # Run actual simulation
+    result = sim.run_simulation(target_hands, strategy_func, num_sessions=1)
+
+    print(f"Actual time: {result.elapsed_seconds:.2f} seconds")
+    if estimate > 0:
+        error_pct = abs(result.elapsed_seconds - estimate) / estimate * 100
+        print(f"Estimation error: {error_pct:.1f}%")
+    print()
+
+
 def demo_large_scale_simulation():
     """Demonstrate large-scale simulation for accurate EV."""
     print("=== Large-Scale Simulation (100,000 hands) ===")
-    print("This may take a few seconds...")
-    print()
 
     basic = Strategy('config/strategies/basic_strategy_h17.json')
     rules = GameRules(dealer_hits_soft_17=True, surrender_allowed=True)
@@ -238,8 +274,7 @@ def demo_large_scale_simulation():
 
     result = sim.run_simulation(100000, strategy_func, num_sessions=1)
 
-    print(f"Total hands: {result.total_hands:,}")
-    print(f"EV per hand: {result.ev_per_hand:+.6f} ({result.ev_per_hand * 100:+.4f}%)")
+    print(result.summary())
     print(f"Expected house edge with basic strategy: ~0.5%")
     print()
 
@@ -250,6 +285,7 @@ if __name__ == '__main__':
     demo_multi_session_simulation()
     demo_strategy_comparison()
     demo_different_game_rules()
+    demo_time_estimation()
     demo_large_scale_simulation()
 
     print("✓ Simulation system demo complete!")

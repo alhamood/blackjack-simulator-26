@@ -87,6 +87,12 @@ header h1 {
     font-weight: 600;
 }
 
+.time-estimate {
+    margin-left: 12px;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
 label {
     display: block;
     font-weight: 500;

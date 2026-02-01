@@ -1,7 +1,7 @@
 # Blackjack Simulator - Project Context
 
 **Last Updated:** 2026-01-31
-**Project Status:** Stage 5 - Web Interface (COMPLETE)
+**Project Status:** Stage 8 - Time Estimation & Reporting (COMPLETE)
 **Repository:** Private GitHub repository (alhamood/blackjack-simulator-26)
 
 ---
@@ -332,6 +332,32 @@ blackjack-simulator-26/
 - Timeout protection: 30s max per simulation
 
 **Detailed Plan:** See `/Users/alberthamood/.claude/plans/moonlit-wobbling-leaf.md` for complete implementation plan with API specs, validation rules, and verification steps
+
+### Stage 8: Time Estimation & Reporting (COMPLETE)
+**Status**: ✓ COMPLETE (2026-01-31)
+**Goal**: Add simulation time estimation and elapsed time reporting
+
+**Completed:**
+- ✓ `SimulationResult.elapsed_seconds` field with display in `summary()`
+- ✓ `Simulator.estimate_time()` method: runs calibration simulation, extrapolates linearly
+  - Multi-session mode: uses same hands-per-session as real run, scales by session count
+  - Single-session mode: 1000-hand calibration, linear extrapolation
+  - Accuracy: ~1-3% error in testing
+- ✓ `POST /api/estimate` endpoint for pre-simulation time estimation
+- ✓ Web UI: time estimate shown inline next to total hands count, updates on parameter changes
+- ✓ Web UI: elapsed time stat card in results display
+- ✓ Web UI: best/worst session in session statistics table
+- ✓ API elapsed_seconds measures full request lifecycle (not just simulation)
+- ✓ Fixed: disabled unnecessary `track_hands` default (was generating 45MB responses)
+- ✓ Demo script: `demo_time_estimation()` in demo_simulator.py
+
+**Key files modified:**
+- `src/simulator.py` - elapsed_seconds, estimate_time(), time import
+- `web/api.py` - /api/estimate endpoint, _build_simulator_and_strategy helper, full-request timing
+- `web/static/app.js` - fetchTimeEstimate(), elapsed time display, best/worst session stats
+- `web/static/index.html` - time-estimate span, elapsed-time stat card
+- `web/static/styles.css` - .time-estimate styling
+- `demo_simulator.py` - demo_time_estimation()
 
 ---
 

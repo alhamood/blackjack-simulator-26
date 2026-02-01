@@ -7,6 +7,7 @@ Classes:
     Simulator: Runs blackjack simulations with configurable parameters
 """
 
+import time
 from dataclasses import dataclass, field
 from typing import Optional, Callable, List
 import statistics
@@ -91,6 +92,7 @@ class SimulationResult:
     surrender_count: int = 0
     double_count: int = 0
     split_count: int = 0
+    elapsed_seconds: float = 0.0
 
     @property
     def ev_per_hand(self) -> float:
@@ -128,9 +130,16 @@ class SimulationResult:
         Returns:
             Formatted summary string
         """
+        # Format elapsed time
+        if self.elapsed_seconds >= 60:
+            time_str = f"{self.elapsed_seconds / 60:.1f} minutes"
+        else:
+            time_str = f"{self.elapsed_seconds:.2f} seconds"
+
         lines = [
             f"=== Simulation Results ===",
             f"Total hands: {self.total_hands:,}",
+            f"Elapsed time: {time_str}",
             f"Total payout: {self.total_payout:+.2f}",
             f"EV per hand: {self.ev_per_hand:+.6f} ({self.ev_per_hand * 100:+.4f}%)",
             f"",
@@ -284,6 +293,7 @@ class Simulator:
             SimulationResult with complete statistics
         """
         result = SimulationResult()
+        start_time = time.perf_counter()
 
         if num_sessions == 1:
             # Single session mode - one long session
@@ -307,6 +317,8 @@ class Simulator:
                 )
                 result.sessions.append(session)
 
+        result.elapsed_seconds = time.perf_counter() - start_time
+
         # Aggregate results from all sessions
         for session in result.sessions:
             result.total_hands += session.hands_played
@@ -321,6 +333,51 @@ class Simulator:
             result.split_count += session.split_count
 
         return result
+
+    def estimate_time(
+        self,
+        total_hands: int,
+        strategy_func: Callable[[Hand, Card], PlayerAction],
+        num_sessions: int = 1,
+        calibration_hands: int = 1000
+    ) -> float:
+        """
+        Estimate how long a simulation will take by running a small calibration.
+
+        Runs a short simulation with the same configuration and extrapolates
+        linearly to the requested size. For multi-session simulations, uses
+        the same hands-per-session as the real run so that per-session
+        overhead is accurately captured.
+
+        Args:
+            total_hands: Total number of hands for the full simulation
+            strategy_func: Strategy function to use
+            num_sessions: Number of sessions for the full simulation
+            calibration_hands: Number of hands to use for calibration
+
+        Returns:
+            Estimated time in seconds
+        """
+        if num_sessions > 1:
+            # Use same hands-per-session as the real run, but fewer sessions
+            hands_per_session = total_hands // num_sessions
+            cal_sessions = max(3, min(num_sessions, 10))
+            cal_total = hands_per_session * cal_sessions
+
+            start = time.perf_counter()
+            self.run_simulation(cal_total, strategy_func, num_sessions=cal_sessions)
+            elapsed = time.perf_counter() - start
+
+            # Scale by number of sessions
+            return elapsed * (num_sessions / cal_sessions)
+        else:
+            cal_total = calibration_hands
+
+            start = time.perf_counter()
+            self.run_simulation(cal_total, strategy_func, num_sessions=1)
+            elapsed = time.perf_counter() - start
+
+            return elapsed * (total_hands / cal_total)
 
     def compare_strategies(
         self,

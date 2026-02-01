@@ -327,45 +327,73 @@ async def get_strategy(strategy_id: str):
     return data
 
 
+def _build_simulator_and_strategy(request: SimulationRequest):
+    """Build Simulator and strategy function from a simulation request."""
+    rules = GameRules(
+        dealer_hits_soft_17=request.game_rules.dealer_hits_soft_17,
+        surrender_allowed=request.game_rules.surrender_allowed,
+        double_after_split=request.game_rules.double_after_split,
+        blackjack_payout=request.game_rules.blackjack_payout
+    )
+
+    if request.shoe.infinite_shoe:
+        sim = Simulator(rules=rules, infinite_shoe=True)
+    else:
+        sim = Simulator(
+            rules=rules,
+            num_decks=request.shoe.num_decks,
+            penetration=request.shoe.penetration
+        )
+
+    if request.simulation.strategy == "custom" and request.simulation.custom_strategy:
+        strategy_func = create_custom_strategy_wrapper(
+            request.simulation.custom_strategy.strategy
+        )
+    else:
+        strategy_path = get_strategies_dir() / f"{request.simulation.strategy}.json"
+        if not strategy_path.exists():
+            raise HTTPException(
+                status_code=400,
+                detail=f"Strategy '{request.simulation.strategy}' not found"
+            )
+        strategy = Strategy(str(strategy_path))
+        strategy_func = create_strategy_wrapper(strategy)
+
+    return sim, strategy_func
+
+
+@app.post("/api/estimate")
+async def estimate_time(request: SimulationRequest):
+    """Estimate how long a simulation will take by running a small calibration."""
+    try:
+        sim, strategy_func = _build_simulator_and_strategy(request)
+
+        hands_per_session = request.simulation.total_hands
+        num_sessions = request.simulation.num_sessions
+        actual_total_hands = hands_per_session * num_sessions
+
+        estimated_seconds = sim.estimate_time(
+            actual_total_hands,
+            strategy_func,
+            num_sessions=num_sessions
+        )
+
+        return {
+            'estimated_seconds': round(estimated_seconds, 3),
+            'total_hands': actual_total_hands
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/simulate")
 async def run_simulation(request: SimulationRequest):
     """Run a blackjack simulation with the provided parameters."""
     try:
-        # Create game rules
-        rules = GameRules(
-            dealer_hits_soft_17=request.game_rules.dealer_hits_soft_17,
-            surrender_allowed=request.game_rules.surrender_allowed,
-            double_after_split=request.game_rules.double_after_split,
-            blackjack_payout=request.game_rules.blackjack_payout
-        )
+        import time as _time
+        request_start = _time.perf_counter()
 
-        # Create simulator
-        if request.shoe.infinite_shoe:
-            sim = Simulator(rules=rules, infinite_shoe=True)
-        else:
-            sim = Simulator(
-                rules=rules,
-                num_decks=request.shoe.num_decks,
-                penetration=request.shoe.penetration
-            )
-
-        # Load or create strategy
-        if request.simulation.strategy == "custom" and request.simulation.custom_strategy:
-            # Use custom strategy
-            strategy_func = create_custom_strategy_wrapper(
-                request.simulation.custom_strategy.strategy
-            )
-        else:
-            # Load strategy from file
-            strategy_path = get_strategies_dir() / f"{request.simulation.strategy}.json"
-            if not strategy_path.exists():
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Strategy '{request.simulation.strategy}' not found"
-                )
-
-            strategy = Strategy(str(strategy_path))
-            strategy_func = create_strategy_wrapper(strategy)
+        sim, strategy_func = _build_simulator_and_strategy(request)
 
         # Run simulation
         # Note: total_hands represents hands PER SESSION
@@ -394,6 +422,7 @@ async def run_simulation(request: SimulationRequest):
                 'total_payout': round(result.total_payout, 2),
                 'ev_per_hand': round(result.ev_per_hand, 6),
                 'ev_percent': round(result.ev_per_hand * 100, 4),
+                'elapsed_seconds': None,  # filled in below
                 'win_count': result.win_count,
                 'loss_count': result.loss_count,
                 'push_count': result.push_count,
@@ -473,6 +502,8 @@ async def run_simulation(request: SimulationRequest):
                 'strategy_examples': categorize_hands_by_strategy(data['sessions']),
                 'total_tracked_hands': sum(len(s.get('hands', [])) for s in data['sessions'])
             }
+
+        data['summary']['elapsed_seconds'] = round(_time.perf_counter() - request_start, 3)
 
         return data
 

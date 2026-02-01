@@ -52,16 +52,14 @@ This document outlines planned enhancements and deployment steps for the blackja
   - Extrapolate to full simulation size
   - Display estimated time to user
 
-### Estimated Time Display (Future Enhancement)
-**Note**: Progress bar with real-time updates proved problematic (memory overhead, complexity).
-Alternative simpler approach:
-- Before starting simulation, run small sample (e.g., 100-1000 hands)
-- Time the sample execution
-- Calculate and display estimated total time
-- Simple "Please wait..." message during execution
-- No streaming/chunking complexity
-
-**Deferred**: Real-time progress updates add significant complexity and memory overhead for marginal UX benefit. Keep simulations simple and fast.
+### Estimated Time Display ✓ COMPLETE
+- Calibration-based estimation: runs small sample, extrapolates linearly
+- Shown inline next to total hands count in config panel
+- Updates automatically when parameters change (debounced)
+- `/api/estimate` endpoint for pre-simulation prediction
+- Accuracy: ~1-3% error in testing
+- Elapsed time shown in results (stat card + CLI summary)
+- Best/worst session stats added to session statistics table
 
 ## Priority 3: Additional Strategies
 

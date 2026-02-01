@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadDefaults();
     setupEventListeners();
     checkForCustomStrategy();
+    fetchTimeEstimate();
 });
 
 // Load default parameters from API
@@ -87,9 +88,13 @@ function setupEventListeners() {
         }
     });
 
-    // Total hands calculation (hands per session × sessions)
+    // Total hands calculation (hands per session × sessions) and time estimate
     document.getElementById('total_hands').addEventListener('input', updateTotalHandsDisplay);
     document.getElementById('num_sessions').addEventListener('input', updateTotalHandsDisplay);
+    document.getElementById('strategy').addEventListener('change', updateTotalHandsDisplay);
+    document.getElementById('num_decks').addEventListener('input', updateTotalHandsDisplay);
+    document.getElementById('penetration').addEventListener('input', updateTotalHandsDisplay);
+    document.getElementById('infinite_shoe').addEventListener('change', updateTotalHandsDisplay);
 
     // Download buttons
     document.getElementById('download-json').addEventListener('click', downloadJSON);
@@ -108,13 +113,67 @@ function updatePayoutLabel(value) {
     }
 }
 
-// Update total hands display (hands per session × sessions)
+// Update total hands display (hands per session × sessions) and time estimate
+let estimateTimer = null;
+
 function updateTotalHandsDisplay() {
     const handsPerSession = parseInt(document.getElementById('total_hands').value) || 0;
     const numSessions = parseInt(document.getElementById('num_sessions').value) || 0;
     const totalHands = handsPerSession * numSessions;
 
     document.getElementById('total-hands-display').textContent = formatNumber(totalHands);
+
+    // Debounce the estimate call
+    if (estimateTimer) clearTimeout(estimateTimer);
+    estimateTimer = setTimeout(fetchTimeEstimate, 500);
+}
+
+async function fetchTimeEstimate() {
+    const estimateSpan = document.getElementById('time-estimate');
+
+    try {
+        const payload = buildRequestPayload();
+        if (!validatePayloadSilent(payload)) {
+            estimateSpan.textContent = '';
+            return;
+        }
+
+        estimateSpan.textContent = '(estimating...)';
+
+        const response = await fetch('/api/estimate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            estimateSpan.textContent = '';
+            return;
+        }
+
+        const data = await response.json();
+        const secs = data.estimated_seconds;
+
+        if (secs >= 60) {
+            estimateSpan.textContent = `(~${(secs / 60).toFixed(1)} min)`;
+        } else {
+            estimateSpan.textContent = `(~${secs.toFixed(1)}s)`;
+        }
+    } catch {
+        estimateSpan.textContent = '';
+    }
+}
+
+// Silent validation (no error display) for estimate calls
+function validatePayloadSilent(payload) {
+    const handsPerSession = payload.simulation.total_hands;
+    const numSessions = payload.simulation.num_sessions;
+    const actualTotalHands = handsPerSession * numSessions;
+
+    if (handsPerSession < 100 || handsPerSession > 1000000) return false;
+    if (numSessions < 1 || numSessions > 10000) return false;
+    if (actualTotalHands > 10000000) return false;
+    return true;
 }
 
 // Check for custom strategy in localStorage
@@ -196,7 +255,7 @@ function buildRequestPayload() {
             total_hands: parseInt(document.getElementById('total_hands').value),
             num_sessions: parseInt(document.getElementById('num_sessions').value),
             strategy: document.getElementById('strategy').value,
-            track_hands: true,  // Enable for chart visualization
+            track_hands: false,
             debug_mode: document.getElementById('debug_mode').checked
         }
     };
@@ -248,6 +307,15 @@ function displayResults(results) {
     document.getElementById('win-rate').textContent = `${(summary.win_rate * 100).toFixed(2)}%`;
     document.getElementById('total-payout').textContent = summary.total_payout.toFixed(2);
     document.getElementById('total-hands').textContent = summary.total_hands.toLocaleString();
+
+    // Display elapsed time
+    if (summary.elapsed_seconds !== undefined) {
+        if (summary.elapsed_seconds >= 60) {
+            document.getElementById('elapsed-time').textContent = `${(summary.elapsed_seconds / 60).toFixed(1)}m`;
+        } else {
+            document.getElementById('elapsed-time').textContent = `${summary.elapsed_seconds.toFixed(2)}s`;
+        }
+    }
 
     // Color-code EV card
     const evCard = document.getElementById('ev-value').closest('.stat-card');
@@ -651,10 +719,22 @@ function updateSessionStatsTable(results) {
     const p50 = percentile(50);  // Median
     const p75 = percentile(75);
     const p90 = percentile(90);
+    const best = payouts[n - 1];
+    const worst = payouts[0];
 
     // Update table
     const tbody = document.getElementById('session-stats-tbody');
     tbody.innerHTML = `
+        <tr>
+            <td>Best Session</td>
+            <td>${best >= 0 ? '+' : ''}${best.toFixed(3)} units</td>
+            <td>Highest session payout</td>
+        </tr>
+        <tr>
+            <td>Worst Session</td>
+            <td>${worst >= 0 ? '+' : ''}${worst.toFixed(3)} units</td>
+            <td>Lowest session payout</td>
+        </tr>
         <tr>
             <td>Mean Payout</td>
             <td>${mean >= 0 ? '+' : ''}${mean.toFixed(3)} units</td>
