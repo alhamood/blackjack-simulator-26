@@ -289,10 +289,11 @@ function createHandOutcomeChart(results) {
     const categories = analyzeHandOutcomes(results);
 
     handOutcomeChart = new Chart(ctx, {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: categories.labels,
             datasets: [{
+                label: 'Hand Count',
                 data: categories.data,
                 backgroundColor: [
                     '#f39c12',  // Orange for blackjacks
@@ -303,8 +304,8 @@ function createHandOutcomeChart(results) {
                     '#95a5a6',  // Gray for surrenders
                     '#7f8c8d'   // Dark gray for pushes
                 ],
-                borderWidth: 2,
-                borderColor: '#fff'
+                borderWidth: 1,
+                borderColor: '#2c3e50'
             }]
         },
         options: {
@@ -312,9 +313,35 @@ function createHandOutcomeChart(results) {
             maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: { size: 11 }
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed.y / total) * 100).toFixed(2);
+                            return `${context.parsed.y.toLocaleString()} hands (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Hands'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Outcome Type'
                     }
                 }
             }
@@ -322,7 +349,7 @@ function createHandOutcomeChart(results) {
     });
 }
 
-// Create session-level outcome chart
+// Create session-level outcome chart (histogram)
 function createSessionOutcomeChart(results) {
     const ctx = document.getElementById('sessionOutcomeChart');
 
@@ -331,22 +358,19 @@ function createSessionOutcomeChart(results) {
         sessionOutcomeChart.destroy();
     }
 
-    // Count winning/losing/breakeven sessions
-    const sessionCategories = analyzeSessionOutcomes(results);
+    // Create histogram data from session payouts
+    const histogramData = createSessionHistogram(results);
 
     sessionOutcomeChart = new Chart(ctx, {
-        type: 'pie',
+        type: 'bar',
         data: {
-            labels: sessionCategories.labels,
+            labels: histogramData.labels,
             datasets: [{
-                data: sessionCategories.data,
-                backgroundColor: [
-                    '#27ae60',  // Green for winning sessions
-                    '#e74c3c',  // Red for losing sessions
-                    '#3498db'   // Blue for break-even sessions
-                ],
-                borderWidth: 2,
-                borderColor: '#fff'
+                label: 'Session Count',
+                data: histogramData.data,
+                backgroundColor: histogramData.colors,
+                borderWidth: 1,
+                borderColor: '#2c3e50'
             }]
         },
         options: {
@@ -354,7 +378,35 @@ function createSessionOutcomeChart(results) {
             maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const sessions = context.parsed.y;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((sessions / total) * 100).toFixed(1);
+                            return `${sessions} sessions (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Sessions'
+                    },
+                    ticks: {
+                        precision: 0
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Session Payout (units)'
+                    }
                 }
             }
         }
@@ -424,6 +476,69 @@ function analyzeSessionOutcomes(results) {
     }
 
     return { labels, data };
+}
+
+// Create histogram data from session payouts
+function createSessionHistogram(results) {
+    if (!results.sessions || results.sessions.length === 0) {
+        return { labels: [], data: [], colors: [] };
+    }
+
+    // Extract session payouts
+    const payouts = results.sessions.map(s => s.total_payout);
+
+    // Calculate range and bin size
+    const min = Math.min(...payouts);
+    const max = Math.max(...payouts);
+    const range = max - min;
+
+    // Use Sturges' rule for number of bins: k = ceil(log2(n) + 1)
+    // But cap between 10 and 30 bins for readability
+    const n = payouts.length;
+    const numBins = Math.min(30, Math.max(10, Math.ceil(Math.log2(n) + 1)));
+    const binSize = range / numBins;
+
+    // Create bins
+    const bins = new Array(numBins).fill(0);
+    const binLabels = [];
+    const binColors = [];
+
+    // Generate bin labels and colors
+    for (let i = 0; i < numBins; i++) {
+        const binStart = min + (i * binSize);
+        const binEnd = min + ((i + 1) * binSize);
+        const binMid = (binStart + binEnd) / 2;
+
+        // Create label (show range for first/last, midpoint for others)
+        if (i === 0) {
+            binLabels.push(`< ${binEnd.toFixed(1)}`);
+        } else if (i === numBins - 1) {
+            binLabels.push(`≥ ${binStart.toFixed(1)}`);
+        } else {
+            binLabels.push(binMid.toFixed(1));
+        }
+
+        // Color based on profitability
+        if (binMid > 0) {
+            binColors.push('#27ae60');  // Green for winning
+        } else if (binMid < 0) {
+            binColors.push('#e74c3c');  // Red for losing
+        } else {
+            binColors.push('#3498db');  // Blue for break-even
+        }
+    }
+
+    // Count sessions in each bin
+    payouts.forEach(payout => {
+        const binIndex = Math.min(numBins - 1, Math.floor((payout - min) / binSize));
+        bins[binIndex]++;
+    });
+
+    return {
+        labels: binLabels,
+        data: bins,
+        colors: binColors
+    };
 }
 
 // Update detailed stats table
