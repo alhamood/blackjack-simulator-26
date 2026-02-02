@@ -178,6 +178,7 @@
             const columns = [
                 { key: 'strategy', label: 'Strategy', sortKey: 'strategy_name' },
                 { key: 'config', label: 'Config', sortKey: 'config_label' },
+                { key: 'bj_payout', label: 'BJ Pays', sortKey: r => r.config.blackjack_payout },
                 { key: 'house_edge', label: 'House Edge', sortKey: r => r.results.house_edge_percent },
                 { key: 'ev_percent', label: 'EV %', sortKey: r => r.results.ev_percent },
                 { key: 'win_rate', label: 'Win Rate', sortKey: r => r.results.win_rate },
@@ -203,8 +204,12 @@
                 const heClass = houseEdgeClass(r.house_edge_percent);
 
                 html += `<tr${rowClass}>`;
+                const bjPayout = row.config.blackjack_payout === 1.2 ? '6:5' : '3:2';
+                const bjClass = row.config.blackjack_payout === 1.2 ? 'house-edge-high' : '';
+
                 html += `<td>${row.strategy_name}</td>`;
                 html += `<td>${row.config_label}</td>`;
+                html += `<td class="${bjClass}">${bjPayout}</td>`;
                 html += `<td class="${heClass}">${r.house_edge_percent.toFixed(3)}%</td>`;
                 html += `<td>${r.ev_percent >= 0 ? '+' : ''}${r.ev_percent.toFixed(3)}%</td>`;
                 html += `<td>${(r.win_rate * 100).toFixed(2)}%</td>`;
@@ -242,6 +247,7 @@
                 switch (key) {
                     case 'strategy': return row.strategy_name.toLowerCase();
                     case 'config': return row.config_label.toLowerCase();
+                    case 'bj_payout': return row.config.blackjack_payout;
                     case 'house_edge': return row.results.house_edge_percent;
                     case 'ev_percent': return row.results.ev_percent;
                     case 'win_rate': return row.results.win_rate;

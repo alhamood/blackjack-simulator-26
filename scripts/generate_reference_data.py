@@ -103,7 +103,8 @@ def config_label(config):
     """Generate a short label for a config."""
     decks = config["num_decks"]
     dealer = "H17" if config["dealer_hits_soft_17"] else "S17"
-    return f"{decks}-deck {dealer}"
+    bj = "6:5" if config["blackjack_payout"] == 1.2 else "3:2"
+    return f"{decks}-deck {dealer} {bj}"
 
 
 def configs_match(a, b):
@@ -223,6 +224,41 @@ def main():
                 "strategy_id": strategy_id,
                 "strategy_name": strategy_name,
                 "config": STANDARD_CONFIG,
+                "config_label": label,
+                "is_natural_config": False,
+                "results": result,
+            })
+            print(f"    EV: {result['ev_percent']:+.4f}%  "
+                  f"House Edge: {result['house_edge_percent']:.4f}%  "
+                  f"({result['elapsed_seconds']:.1f}s)")
+
+        # 6:5 variant of natural config
+        config_65 = {**natural_config, "blackjack_payout": 1.2}
+        label = config_label(config_65)
+        print(f"[{len(all_results) + 1}] {strategy_name} @ {label} (6:5)")
+        result = run_simulation(strategy_file, config_65, total_hands)
+        all_results.append({
+            "strategy_id": strategy_id,
+            "strategy_name": strategy_name,
+            "config": config_65,
+            "config_label": label,
+            "is_natural_config": False,
+            "results": result,
+        })
+        print(f"    EV: {result['ev_percent']:+.4f}%  "
+              f"House Edge: {result['house_edge_percent']:.4f}%  "
+              f"({result['elapsed_seconds']:.1f}s)")
+
+        # 6:5 variant of standard cross-test if applicable
+        if not configs_match(natural_config, STANDARD_CONFIG):
+            config_std_65 = {**STANDARD_CONFIG, "blackjack_payout": 1.2}
+            label = config_label(config_std_65)
+            print(f"[{len(all_results) + 1}] {strategy_name} @ {label} (cross-test 6:5)")
+            result = run_simulation(strategy_file, config_std_65, total_hands)
+            all_results.append({
+                "strategy_id": strategy_id,
+                "strategy_name": strategy_name,
+                "config": config_std_65,
                 "config_label": label,
                 "is_natural_config": False,
                 "results": result,
