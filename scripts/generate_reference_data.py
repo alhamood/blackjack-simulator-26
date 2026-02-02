@@ -13,6 +13,7 @@ Output: web/static/data/strategy_reference.json
 import sys
 import json
 import time
+import argparse
 from pathlib import Path
 from datetime import datetime
 
@@ -169,7 +170,12 @@ def get_hands_from_convergence():
 
 
 def main():
-    total_hands = get_hands_from_convergence()
+    parser = argparse.ArgumentParser(description="Generate strategy reference data")
+    parser.add_argument("--hands", type=int, default=None,
+                        help="Number of hands per simulation (overrides convergence result)")
+    args = parser.parse_args()
+
+    total_hands = args.hands if args.hands else get_hands_from_convergence()
 
     print("=" * 60)
     print("Strategy Reference Data Generation")
