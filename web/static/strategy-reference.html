@@ -96,34 +96,7 @@
             font-weight: 600;
         }
 
-        .convergence-table {
-            width: auto;
-            margin: 0 auto;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
 
-        .convergence-table th,
-        .convergence-table td {
-            border: 1px solid #ddd;
-            padding: 8px 14px;
-            text-align: center;
-        }
-
-        .convergence-table th {
-            background-color: #34495e;
-            color: white;
-            font-weight: 600;
-        }
-
-        .converged-yes {
-            color: #27ae60;
-            font-weight: 600;
-        }
-
-        .converged-no {
-            color: #e74c3c;
-        }
 
         .metadata-footer {
             margin-top: 20px;
@@ -156,16 +129,6 @@
         </header>
 
         <main>
-            <!-- Convergence Section -->
-            <section class="section-card" id="convergence-section" style="display: none;">
-                <h2>EV Convergence Analysis</h2>
-                <p class="info-text">
-                    How many hands do we need to reliably estimate a strategy's EV?
-                    We ran 10 independent trials at each hand count and measured the spread of EV estimates.
-                </p>
-                <div id="convergence-content"></div>
-            </section>
-
             <!-- Reference Table Section -->
             <section class="section-card" id="reference-section">
                 <h2>Strategy Performance</h2>
@@ -192,7 +155,6 @@
                 const response = await fetch('/static/data/strategy_reference.json');
                 if (!response.ok) throw new Error('Failed to load reference data');
                 referenceData = await response.json();
-                renderConvergence();
                 renderReferenceTable();
                 renderMetadata();
             } catch (error) {
@@ -200,41 +162,6 @@
                     '<p style="color: #e74c3c;">Failed to load reference data. Run scripts/generate_reference_data.py first.</p>';
             }
         });
-
-        function renderConvergence() {
-            if (!referenceData.convergence) return;
-
-            const section = document.getElementById('convergence-section');
-            section.style.display = 'block';
-
-            const conv = referenceData.convergence;
-            const levels = conv.levels;
-            const rec = conv.recommendation;
-
-            let html = '<table class="convergence-table"><thead><tr>';
-            html += '<th>Hands</th><th>Mean EV</th><th>Stdev</th><th>Range</th><th>Converged?</th>';
-            html += '</tr></thead><tbody>';
-
-            levels.forEach(level => {
-                const convergedClass = level.converged ? 'converged-yes' : 'converged-no';
-                const convergedText = level.converged ? '&#10003;' : '&#10007;';
-                html += '<tr>';
-                html += `<td>${formatHandCount(level.hand_count)}</td>`;
-                html += `<td>${level.ev_mean_percent.toFixed(4)}%</td>`;
-                html += `<td>${level.ev_stdev_percent.toFixed(4)}%</td>`;
-                html += `<td>${level.ev_range_percent.toFixed(4)}%</td>`;
-                html += `<td class="${convergedClass}">${convergedText}</td>`;
-                html += '</tr>';
-            });
-
-            html += '</tbody></table>';
-
-            if (rec && rec.note) {
-                html += `<p class="info-text" style="margin-top: 15px; text-align: center;"><strong>Result:</strong> ${rec.note}</p>`;
-            }
-
-            document.getElementById('convergence-content').innerHTML = html;
-        }
 
         function renderReferenceTable() {
             if (!referenceData.results || referenceData.results.length === 0) {
