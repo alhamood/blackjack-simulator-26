@@ -37,6 +37,7 @@ class SessionResult:
     """
     hands_played: int = 0
     total_payout: float = 0.0
+    total_wagered: float = 0.0
     win_count: int = 0
     loss_count: int = 0
     push_count: int = 0
@@ -53,6 +54,13 @@ class SessionResult:
         if self.hands_played == 0:
             return 0.0
         return self.total_payout / self.hands_played
+
+    @property
+    def ev_per_unit_bet(self) -> float:
+        """Expected value per unit wagered."""
+        if self.total_wagered == 0:
+            return 0.0
+        return self.total_payout / self.total_wagered
 
     @property
     def win_rate(self) -> float:
@@ -83,6 +91,7 @@ class SimulationResult:
     """
     total_hands: int = 0
     total_payout: float = 0.0
+    total_wagered: float = 0.0
     sessions: List[SessionResult] = field(default_factory=list)
     win_count: int = 0
     loss_count: int = 0
@@ -100,6 +109,13 @@ class SimulationResult:
         if self.total_hands == 0:
             return 0.0
         return self.total_payout / self.total_hands
+
+    @property
+    def ev_per_unit_bet(self) -> float:
+        """Expected value per unit wagered."""
+        if self.total_wagered == 0:
+            return 0.0
+        return self.total_payout / self.total_wagered
 
     @property
     def win_rate(self) -> float:
@@ -201,6 +217,7 @@ class Simulator:
         num_hands: int,
         strategy_func: Callable[[Hand, Card], PlayerAction],
         shoe: Optional[Shoe] = None,
+        betting_strategy=None,
         track_hands: bool = False,
         max_tracked_hands: int = 100
     ) -> SessionResult:
@@ -211,6 +228,7 @@ class Simulator:
             num_hands: Number of hands to play
             strategy_func: Strategy function (player_hand, dealer_upcard) -> PlayerAction
             shoe: Optional shoe to use (creates new one if None)
+            betting_strategy: Optional BettingStrategy for variable bet sizing
             track_hands: If True, store individual hand results for export
             max_tracked_hands: Maximum number of hands to track (default 100)
 
@@ -224,15 +242,34 @@ class Simulator:
                 infinite=self.infinite_shoe
             )
 
+        if betting_strategy:
+            betting_strategy.reset()
+            if hasattr(betting_strategy, 'set_shoe'):
+                betting_strategy.set_shoe(shoe)
+
         session = SessionResult()
 
         for _ in range(num_hands):
-            game = BlackjackGame(shoe, rules=self.rules)
+            # Get bet from betting strategy
+            bet = betting_strategy.get_bet() if betting_strategy else 1.0
+
+            game = BlackjackGame(shoe, rules=self.rules, bet=bet)
             result = game.play_hand(strategy_func=strategy_func)
+
+            # Update betting strategy with outcome
+            if betting_strategy:
+                if result.payout > 0:
+                    outcome = 'win'
+                elif result.payout < 0:
+                    outcome = 'loss'
+                else:
+                    outcome = 'push'
+                betting_strategy.update(outcome, result.payout, result.bet)
 
             # Update statistics
             session.hands_played += 1
             session.total_payout += result.payout
+            session.total_wagered += result.bet
 
             # Track outcomes
             if result.payout > 0:
@@ -248,12 +285,12 @@ class Simulator:
             elif result.outcome == HandOutcome.PLAYER_BUST:
                 session.bust_count += 1
 
-            # Track surrenders (payout is -0.5)
-            if result.payout == -0.5:
+            # Track surrenders (payout is half the bet)
+            if result.outcome == HandOutcome.DEALER_WIN and abs(result.payout) == bet * 0.5:
                 session.surrender_count += 1
 
-            # Track doubles (bet is 2.0 or contains double in actions)
-            if result.bet == 2.0 or any('double' in action for action in result.actions):
+            # Track doubles (actions contain double)
+            if any('double' in action for action in result.actions):
                 session.double_count += 1
 
             # Track splits (split_hands_count > 1)
@@ -271,6 +308,7 @@ class Simulator:
         total_hands: int,
         strategy_func: Callable[[Hand, Card], PlayerAction],
         num_sessions: int = 1,
+        betting_strategy=None,
         track_hands: bool = False,
         max_tracked_hands: int = 100
     ) -> SimulationResult:
@@ -286,6 +324,7 @@ class Simulator:
             total_hands: Total number of hands to play across all sessions
             strategy_func: Strategy function
             num_sessions: Number of sessions (1 for single long session)
+            betting_strategy: Optional BettingStrategy for variable bet sizing
             track_hands: If True, store sample of individual hand results for export
             max_tracked_hands: Maximum number of hands to track (default 100)
 
@@ -300,6 +339,7 @@ class Simulator:
             session = self.run_session(
                 total_hands,
                 strategy_func,
+                betting_strategy=betting_strategy,
                 track_hands=track_hands,
                 max_tracked_hands=max_tracked_hands
             )
@@ -312,6 +352,7 @@ class Simulator:
                 session = self.run_session(
                     hands_per_session,
                     strategy_func,
+                    betting_strategy=betting_strategy,
                     track_hands=track_hands,
                     max_tracked_hands=max_tracked_hands
                 )
@@ -323,6 +364,7 @@ class Simulator:
         for session in result.sessions:
             result.total_hands += session.hands_played
             result.total_payout += session.total_payout
+            result.total_wagered += session.total_wagered
             result.win_count += session.win_count
             result.loss_count += session.loss_count
             result.push_count += session.push_count

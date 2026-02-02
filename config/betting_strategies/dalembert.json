@@ -1,0 +1,9 @@
+{
+  "name": "D'Alembert",
+  "description": "Increase bet by 1 unit after loss, decrease by 1 unit after win. Gradual progression.",
+  "type": "dalembert",
+  "params": {
+    "base_unit": 1.0,
+    "max_bet": 1000.0
+  }
+}

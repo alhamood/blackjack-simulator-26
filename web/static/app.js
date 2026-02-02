@@ -44,6 +44,27 @@ async function loadDefaults() {
             strategySelect.appendChild(option);
         });
 
+        // Populate betting strategy dropdown
+        if (defaults.available_betting_strategies) {
+            const bettingSelect = document.getElementById('betting_strategy');
+            const bettingDesc = document.getElementById('betting-description');
+            bettingSelect.innerHTML = '';
+            defaults.available_betting_strategies.forEach(bs => {
+                const option = document.createElement('option');
+                option.value = bs.id;
+                option.textContent = bs.name;
+                option.dataset.description = bs.description;
+                bettingSelect.appendChild(option);
+            });
+            // Show description for selected strategy
+            const updateBettingDesc = () => {
+                const selected = bettingSelect.options[bettingSelect.selectedIndex];
+                bettingDesc.textContent = selected ? selected.dataset.description : '';
+            };
+            bettingSelect.addEventListener('change', updateBettingDesc);
+            updateBettingDesc();
+        }
+
         // Add custom strategy option if available
         if (localStorage.getItem('customStrategy')) {
             const option = document.createElement('option');
@@ -260,6 +281,7 @@ function buildRequestPayload() {
             total_hands: parseInt(document.getElementById('total_hands').value),
             num_sessions: parseInt(document.getElementById('num_sessions').value),
             strategy: document.getElementById('strategy').value,
+            betting_strategy: document.getElementById('betting_strategy').value,
             track_hands: false,
             debug_mode: document.getElementById('debug_mode').checked
         }
@@ -329,6 +351,19 @@ function displayResults(results) {
         evCard.classList.add('positive');
     } else if (summary.ev_per_hand < 0) {
         evCard.classList.add('negative');
+    }
+
+    // Show betting stats if non-flat strategy
+    const bettingEvCard = document.getElementById('betting-ev-card');
+    const avgBetCard = document.getElementById('avg-bet-card');
+    if (summary.average_bet !== undefined && summary.average_bet !== 1.0) {
+        document.getElementById('ev-per-unit').textContent = `${(summary.ev_per_unit_bet * 100).toFixed(4)}%`;
+        document.getElementById('avg-bet').textContent = summary.average_bet.toFixed(2);
+        bettingEvCard.classList.remove('hidden');
+        avgBetCard.classList.remove('hidden');
+    } else {
+        bettingEvCard.classList.add('hidden');
+        avgBetCard.classList.add('hidden');
     }
 
     // Create charts

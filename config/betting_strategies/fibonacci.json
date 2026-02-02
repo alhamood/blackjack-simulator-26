@@ -1,0 +1,9 @@
+{
+  "name": "Fibonacci",
+  "description": "Follow Fibonacci sequence (1,1,2,3,5,8,...) on losses, step back 2 positions on win.",
+  "type": "fibonacci",
+  "params": {
+    "base_unit": 1.0,
+    "max_bet": 1000.0
+  }
+}

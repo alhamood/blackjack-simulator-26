@@ -110,6 +110,15 @@
                             </label>
                         </div>
                         <div class="form-row">
+                            <label for="betting_strategy">
+                                Betting Strategy:
+                                <select id="betting_strategy" name="betting_strategy" class="strategy-select">
+                                    <option value="flat">Flat Betting</option>
+                                </select>
+                            </label>
+                            <div id="betting-description" class="info-text" style="margin-top: 4px;"></div>
+                        </div>
+                        <div class="form-row">
                             <a href="/strategy-editor.html" class="editor-link">Create/Edit Custom Strategy →</a>
                             &nbsp;&nbsp;|&nbsp;&nbsp;
                             <a href="/strategy-reference.html" class="editor-link">Strategy EV Reference →</a>
@@ -162,6 +171,16 @@
                         <div class="stat-label">Total Hands</div>
                         <div id="total-hands" class="stat-value">-</div>
                         <div class="stat-sublabel">Played</div>
+                    </div>
+                    <div class="stat-card hidden" id="betting-ev-card">
+                        <div class="stat-label">EV Per Unit Bet</div>
+                        <div id="ev-per-unit" class="stat-value">-</div>
+                        <div class="stat-sublabel">Percent</div>
+                    </div>
+                    <div class="stat-card hidden" id="avg-bet-card">
+                        <div class="stat-label">Avg Bet Size</div>
+                        <div id="avg-bet" class="stat-value">-</div>
+                        <div class="stat-sublabel">Units</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Elapsed Time</div>

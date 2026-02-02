@@ -101,19 +101,20 @@ class BlackjackGame:
     Simplified for simulation - no splitting support yet.
     """
 
-    def __init__(self, shoe: Shoe, rules: Optional[GameRules] = None):
+    def __init__(self, shoe: Shoe, rules: Optional[GameRules] = None, bet: float = 1.0):
         """
         Initialize a blackjack game.
 
         Args:
             shoe: The shoe to deal cards from
             rules: Game rules configuration (uses defaults if None)
+            bet: Base bet amount for this hand
         """
         self.shoe = shoe
         self.rules = rules or GameRules()
         self.dealer = Dealer(hits_soft_17=self.rules.dealer_hits_soft_17)
         self.player_hand = Hand()
-        self.bet = 1.0  # Default bet
+        self.bet = bet
 
     def deal_initial_cards(self):
         """Deal initial two cards to player and dealer."""
@@ -192,7 +193,7 @@ class BlackjackGame:
         # Each entry tracks: hand, bet, whether it's complete, if it's split aces, and actions for this hand
         split_hands = [{
             'hand': self.player_hand,
-            'bet': 1.0,
+            'bet': self.bet,
             'is_complete': False,
             'is_aces': False,
             'actions': []
@@ -258,7 +259,7 @@ class BlackjackGame:
                         # Replace current hand with first split hand
                         split_hands[hand_idx] = {
                             'hand': hand1,
-                            'bet': 1.0,
+                            'bet': self.bet,
                             'is_complete': is_aces,  # Aces are complete after one card
                             'is_aces': is_aces,
                             'received_card': True,  # First hand already got its second card
@@ -268,7 +269,7 @@ class BlackjackGame:
                         # Insert second split hand after current
                         split_hands.insert(hand_idx + 1, {
                             'hand': hand2,
-                            'bet': 1.0,
+                            'bet': self.bet,
                             'is_complete': False,
                             'is_aces': is_aces,
                             'received_card': False,  # Will get card when we iterate to it

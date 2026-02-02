@@ -1,0 +1,9 @@
+{
+  "name": "Paroli",
+  "description": "Double bet after each win, reset after 3 consecutive wins or any loss.",
+  "type": "paroli",
+  "params": {
+    "base_unit": 1.0,
+    "max_bet": 1000.0
+  }
+}

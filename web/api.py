@@ -23,6 +23,7 @@ from src.simulator import Simulator, SimulationResult
 from src.game import GameRules, PlayerAction
 from src.player import Strategy
 from src.reporter import export_to_json
+from src.betting import BettingStrategy
 
 
 # Pydantic models for request validation
@@ -64,6 +65,7 @@ class SimulationConfig(BaseModel):
     total_hands: int = Field(default=100, ge=100, le=10000000, description="Hands per session")
     num_sessions: int = Field(default=1000, ge=1, le=100000, description="Number of sessions")
     strategy: str = "basic_strategy_h17"
+    betting_strategy: str = "flat"
     track_hands: bool = False
     debug_mode: bool = False
     custom_strategy: Optional[CustomStrategyRequest] = None
@@ -110,6 +112,19 @@ app.add_middleware(
 def get_strategies_dir() -> Path:
     """Get path to strategies directory."""
     return Path(__file__).parent.parent / "config" / "strategies"
+
+
+def get_betting_strategies_dir() -> Path:
+    """Get path to betting strategies directory."""
+    return Path(__file__).parent.parent / "config" / "betting_strategies"
+
+
+def load_betting_strategy(strategy_id: str) -> BettingStrategy:
+    """Load a betting strategy from JSON config."""
+    path = get_betting_strategies_dir() / f"{strategy_id}.json"
+    if not path.exists():
+        raise HTTPException(status_code=400, detail=f"Betting strategy '{strategy_id}' not found")
+    return BettingStrategy.from_json(str(path))
 
 
 def load_strategy_metadata(strategy_id: str) -> Dict[str, Any]:
@@ -280,6 +295,23 @@ async def get_defaults():
     # Sort: basic_strategy_h17 first, then alphabetically by name
     available_strategies.sort(key=lambda s: (0 if s["id"] == "basic_strategy_h17" else 1, s["name"]))
 
+    # Load available betting strategies
+    betting_strategies_dir = get_betting_strategies_dir()
+    available_betting_strategies = []
+    for bs_file in betting_strategies_dir.glob("*.json"):
+        try:
+            with open(bs_file) as f:
+                bs_data = json.load(f)
+            available_betting_strategies.append({
+                "id": bs_file.stem,
+                "name": bs_data.get("name", bs_file.stem),
+                "description": bs_data.get("description", "")
+            })
+        except Exception:
+            continue
+    # Sort: flat first, then alphabetically
+    available_betting_strategies.sort(key=lambda s: (0 if s["id"] == "flat" else 1, s["name"]))
+
     return {
         "game_rules": {
             "dealer_hits_soft_17": True,
@@ -297,7 +329,8 @@ async def get_defaults():
             "num_sessions": 1000,
             "track_hands": False
         },
-        "available_strategies": available_strategies
+        "available_strategies": available_strategies,
+        "available_betting_strategies": available_betting_strategies
     }
 
 
@@ -333,6 +366,28 @@ async def get_strategy(strategy_id: str):
     return data
 
 
+@app.get("/api/betting-strategies")
+async def list_betting_strategies():
+    """List all available betting strategies."""
+    betting_dir = get_betting_strategies_dir()
+    strategies = []
+    for bs_file in betting_dir.glob("*.json"):
+        try:
+            with open(bs_file) as f:
+                data = json.load(f)
+            strategies.append({
+                "id": bs_file.stem,
+                "name": data.get("name", bs_file.stem),
+                "description": data.get("description", ""),
+                "type": data.get("type", "flat"),
+                "params": data.get("params", {})
+            })
+        except Exception:
+            continue
+    strategies.sort(key=lambda s: (0 if s["id"] == "flat" else 1, s["name"]))
+    return {"betting_strategies": strategies}
+
+
 def _build_simulator_and_strategy(request: SimulationRequest):
     """Build Simulator and strategy function from a simulation request."""
     rules = GameRules(
@@ -365,14 +420,21 @@ def _build_simulator_and_strategy(request: SimulationRequest):
         strategy = Strategy(str(strategy_path))
         strategy_func = create_strategy_wrapper(strategy)
 
-    return sim, strategy_func
+    # Load betting strategy
+    bs_id = request.simulation.betting_strategy
+    if bs_id and bs_id != "flat":
+        betting_strat = load_betting_strategy(bs_id)
+    else:
+        betting_strat = None  # flat betting = no betting strategy needed
+
+    return sim, strategy_func, betting_strat
 
 
 @app.post("/api/estimate")
 async def estimate_time(request: SimulationRequest):
     """Estimate how long a simulation will take by running a small calibration."""
     try:
-        sim, strategy_func = _build_simulator_and_strategy(request)
+        sim, strategy_func, _ = _build_simulator_and_strategy(request)
 
         hands_per_session = request.simulation.total_hands
         num_sessions = request.simulation.num_sessions
@@ -399,7 +461,7 @@ async def run_simulation(request: SimulationRequest):
         import time as _time
         request_start = _time.perf_counter()
 
-        sim, strategy_func = _build_simulator_and_strategy(request)
+        sim, strategy_func, betting_strat = _build_simulator_and_strategy(request)
 
         # Run simulation
         # Note: total_hands represents hands PER SESSION
@@ -416,6 +478,7 @@ async def run_simulation(request: SimulationRequest):
             actual_total_hands,
             strategy_func,
             num_sessions=num_sessions,
+            betting_strategy=betting_strat,
             track_hands=track_hands,
             max_tracked_hands=max_tracked
         )
@@ -437,7 +500,10 @@ async def run_simulation(request: SimulationRequest):
                 'bust_count': result.bust_count,
                 'surrender_count': result.surrender_count,
                 'double_count': result.double_count,
-                'split_count': result.split_count
+                'split_count': result.split_count,
+                'total_wagered': round(result.total_wagered, 2),
+                'ev_per_unit_bet': round(result.ev_per_unit_bet, 6),
+                'average_bet': round(result.total_wagered / result.total_hands, 4) if result.total_hands > 0 else 1.0,
             },
             'sessions': []
         }

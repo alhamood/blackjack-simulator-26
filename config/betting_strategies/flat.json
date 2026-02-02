@@ -1,0 +1,9 @@
+{
+  "name": "Flat Betting",
+  "description": "Always bet the same amount (1 unit per hand)",
+  "type": "flat",
+  "params": {
+    "base_unit": 1.0,
+    "max_bet": 1000.0
+  }
+}

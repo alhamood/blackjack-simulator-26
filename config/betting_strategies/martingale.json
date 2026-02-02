@@ -1,0 +1,9 @@
+{
+  "name": "Martingale",
+  "description": "Double bet after each loss, reset to base after win. Classic negative progression system.",
+  "type": "martingale",
+  "params": {
+    "base_unit": 1.0,
+    "max_bet": 1000.0
+  }
+}
