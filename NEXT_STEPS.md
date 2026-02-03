@@ -2,18 +2,15 @@
 
 **Last Updated:** 2026-02-02
 
-## In Progress
+## Completed
 
-### 6:5 Reference Data Generation
-- 100M-hand simulations running for all strategies with 6:5 blackjack payout
-- Doubles total reference entries from 16 to 32
-- Monitor: `tail -f reference_65.log`
-- When done: commit `strategy_reference.json`, push, pull on server
+### 6:5 Reference Data Generation ✓
+- 100M-hand simulations for all strategies with 6:5 blackjack payout
+- Reference entries doubled from 16 to 32
+- Pushed to production 2026-02-02
 
-### DNS/SSL Setup
-- Domain: blackjack.hamood.com (Namecheap → Lightsail IP)
-- Namecheap set to BasicDNS with A record for `blackjack` subdomain
-- Once DNS propagates: `sudo certbot --nginx -d blackjack.hamood.com`
+### DNS/SSL Setup ✓
+- Domain: blackjack.hamood.com on Lightsail
 
 ## Priority 1: Card Counting Betting (Phase 2)
 
@@ -60,6 +57,11 @@ Three tests in `tests/test_api.py` fail due to stale assertions:
 - Confidence intervals for EV
 - Variance decomposition
 - Strategy heat maps showing EV by situation
+- Streak statistics (longest winning/losing streaks, distribution of streaks)
+
+### Custom Decks
+- Ability to test modified/non-standard card decks (e.g. removed cards, extra cards)
+- Useful for exploring how deck composition affects house edge
 
 ### Performance
 - Background job processing for very large simulations
