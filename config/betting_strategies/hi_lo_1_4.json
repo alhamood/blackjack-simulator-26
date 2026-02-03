@@ -1,5 +1,5 @@
 {
-  "name": "Hi-Lo 1-4 Spread",
+  "name": "Hi-Lo 1-4 Spread (Counting)",
   "description": "Hi-Lo card counting with conservative 1-2-3-4 bet spread based on true count.",
   "type": "hi_lo",
   "params": {
