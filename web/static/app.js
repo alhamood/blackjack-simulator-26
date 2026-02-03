@@ -907,6 +907,16 @@ function updateSessionStatsTable(results) {
             <td>${p90 >= 0 ? '+' : ''}${p90.toFixed(3)} units</td>
             <td>90% of sessions worse than this</td>
         </tr>
+        <tr>
+            <td>Longest Win Streak</td>
+            <td>${results.summary.max_win_streak || 0} hands</td>
+            <td>Most consecutive winning hands</td>
+        </tr>
+        <tr>
+            <td>Longest Loss Streak</td>
+            <td>${results.summary.max_loss_streak || 0} hands</td>
+            <td>Most consecutive losing hands</td>
+        </tr>
     `;
 }
 
@@ -1032,6 +1042,8 @@ function downloadCSV() {
     csv += `Bust Count,${summary.bust_count}\n`;
     csv += `Surrender Count,${summary.surrender_count}\n`;
     csv += `Double Count,${summary.double_count}\n`;
+    csv += `Max Win Streak,${summary.max_win_streak || 0}\n`;
+    csv += `Max Loss Streak,${summary.max_loss_streak || 0}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
