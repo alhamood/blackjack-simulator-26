@@ -222,7 +222,11 @@ class HiLoCountingBetting(BettingStrategy):
                     key <= true_count. Default: {1: 1, 2: 2, 3: 4, 4: 8}
         """
         super().__init__(base_unit, max_bet)
-        self._spread = spread if spread is not None else self.DEFAULT_SPREAD.copy()
+        # Convert string keys to int (JSON loads keys as strings)
+        if spread is not None:
+            self._spread = {int(k): v for k, v in spread.items()}
+        else:
+            self._spread = self.DEFAULT_SPREAD.copy()
         self._spread_thresholds = sorted(self._spread.keys())
         self._shoe = None
 
