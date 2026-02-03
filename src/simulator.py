@@ -34,6 +34,8 @@ class SessionResult:
         double_count: Number of doubles
         split_count: Number of times player split
         hand_results: Optional list of individual hand results (for sampling/export)
+        max_win_streak: Longest consecutive winning streak
+        max_loss_streak: Longest consecutive losing streak
     """
     hands_played: int = 0
     total_payout: float = 0.0
@@ -47,6 +49,8 @@ class SessionResult:
     double_count: int = 0
     split_count: int = 0
     hand_results: List[GameResult] = field(default_factory=list)
+    max_win_streak: int = 0
+    max_loss_streak: int = 0
 
     @property
     def ev_per_hand(self) -> float:
@@ -88,6 +92,8 @@ class SimulationResult:
         surrender_count: Total surrenders
         double_count: Total doubles
         split_count: Total splits
+        max_win_streak: Longest winning streak across all sessions
+        max_loss_streak: Longest losing streak across all sessions
     """
     total_hands: int = 0
     total_payout: float = 0.0
@@ -102,6 +108,8 @@ class SimulationResult:
     double_count: int = 0
     split_count: int = 0
     elapsed_seconds: float = 0.0
+    max_win_streak: int = 0
+    max_loss_streak: int = 0
 
     @property
     def ev_per_hand(self) -> float:
@@ -170,6 +178,10 @@ class SimulationResult:
             f"  Busts: {self.bust_count:,}",
             f"  Surrenders: {self.surrender_count:,}",
             f"  Doubles: {self.double_count:,}",
+            f"",
+            f"Streaks:",
+            f"  Longest win streak: {self.max_win_streak}",
+            f"  Longest loss streak: {self.max_loss_streak}",
         ]
 
         if self.sessions:
@@ -249,6 +261,10 @@ class Simulator:
 
         session = SessionResult()
 
+        # Streak tracking
+        current_win_streak = 0
+        current_loss_streak = 0
+
         for _ in range(num_hands):
             # Get bet from betting strategy
             bet = betting_strategy.get_bet() if betting_strategy else 1.0
@@ -271,13 +287,22 @@ class Simulator:
             session.total_payout += result.payout
             session.total_wagered += result.bet
 
-            # Track outcomes
+            # Track outcomes and streaks
             if result.payout > 0:
                 session.win_count += 1
+                current_win_streak += 1
+                current_loss_streak = 0
+                if current_win_streak > session.max_win_streak:
+                    session.max_win_streak = current_win_streak
             elif result.payout < 0:
                 session.loss_count += 1
+                current_loss_streak += 1
+                current_win_streak = 0
+                if current_loss_streak > session.max_loss_streak:
+                    session.max_loss_streak = current_loss_streak
             else:
                 session.push_count += 1
+                # Pushes don't break streaks (they're neutral)
 
             # Track special outcomes
             if result.outcome == HandOutcome.PLAYER_BLACKJACK:
@@ -373,6 +398,11 @@ class Simulator:
             result.surrender_count += session.surrender_count
             result.double_count += session.double_count
             result.split_count += session.split_count
+            # Track max streaks across all sessions
+            if session.max_win_streak > result.max_win_streak:
+                result.max_win_streak = session.max_win_streak
+            if session.max_loss_streak > result.max_loss_streak:
+                result.max_loss_streak = session.max_loss_streak
 
         return result
 

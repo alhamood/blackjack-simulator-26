@@ -504,6 +504,8 @@ async def run_simulation(request: SimulationRequest):
                 'total_wagered': round(result.total_wagered, 2),
                 'ev_per_unit_bet': round(result.ev_per_unit_bet, 6),
                 'average_bet': round(result.total_wagered / result.total_hands, 4) if result.total_hands > 0 else 1.0,
+                'max_win_streak': result.max_win_streak,
+                'max_loss_streak': result.max_loss_streak,
             },
             'sessions': []
         }
@@ -524,7 +526,9 @@ async def run_simulation(request: SimulationRequest):
                 'bust_count': session.bust_count,
                 'surrender_count': session.surrender_count,
                 'double_count': session.double_count,
-                'split_count': session.split_count
+                'split_count': session.split_count,
+                'max_win_streak': session.max_win_streak,
+                'max_loss_streak': session.max_loss_streak
             }
 
             # Include hand data if tracked

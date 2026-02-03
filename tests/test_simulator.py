@@ -282,6 +282,37 @@ class TestSimulator(unittest.TestCase):
             results['Hit to 17'].ev_per_hand
         )
 
+    def test_run_session_tracks_streaks(self):
+        """Test that sessions track winning and losing streaks."""
+        sim = Simulator(infinite_shoe=True)
+
+        def always_stand(player_hand, dealer_upcard):
+            return PlayerAction.STAND
+
+        session = sim.run_session(500, always_stand)
+
+        # Should have at least some streaks
+        self.assertGreater(session.max_win_streak, 0)
+        self.assertGreater(session.max_loss_streak, 0)
+        # Streaks should be reasonable (not unrealistically long)
+        self.assertLess(session.max_win_streak, 50)
+        self.assertLess(session.max_loss_streak, 50)
+
+    def test_run_simulation_aggregates_streaks(self):
+        """Test that simulation aggregates max streaks across sessions."""
+        sim = Simulator(infinite_shoe=True)
+
+        def always_stand(player_hand, dealer_upcard):
+            return PlayerAction.STAND
+
+        result = sim.run_simulation(1000, always_stand, num_sessions=10)
+
+        # Max streak should be the max across all sessions
+        session_max_win = max(s.max_win_streak for s in result.sessions)
+        session_max_loss = max(s.max_loss_streak for s in result.sessions)
+        self.assertEqual(result.max_win_streak, session_max_win)
+        self.assertEqual(result.max_loss_streak, session_max_loss)
+
 
 if __name__ == '__main__':
     unittest.main()
