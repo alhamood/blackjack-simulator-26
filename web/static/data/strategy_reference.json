@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-02-01T22:46:35.220562",
+    "generated_at": "2026-02-02T13:13:46.117927",
     "hands_per_simulation": 100000000,
-    "total_simulations": 16,
-    "total_elapsed_minutes": 401.0
+    "total_simulations": 32,
+    "total_elapsed_minutes": 791.7
   },
   "convergence": {
     "levels": [
@@ -91,22 +91,50 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.00583231,
-        "ev_percent": -0.5832,
-        "house_edge_percent": 0.5832,
-        "win_rate": 0.421514,
-        "blackjack_rate": 0.045261,
-        "bust_rate": 0.12946,
+        "ev_per_hand": -0.00571017,
+        "ev_percent": -0.571,
+        "house_edge_percent": 0.571,
+        "win_rate": 0.42157,
+        "blackjack_rate": 0.045271,
+        "bust_rate": 0.129368,
         "surrender_rate": 0.051968,
-        "double_rate": 0.123075,
-        "split_rate": 0.024528,
-        "push_rate": 0.083682,
-        "loss_rate": 0.494803,
-        "elapsed_seconds": 1504.65
+        "double_rate": 0.107224,
+        "split_rate": 0.024505,
+        "push_rate": 0.083681,
+        "loss_rate": 0.49475,
+        "elapsed_seconds": 1504.96
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_4to8deck_H17",
+      "strategy_name": "Basic Strategy (4-8 Deck, H17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01952712,
+        "ev_percent": -1.9527,
+        "house_edge_percent": 1.9527,
+        "win_rate": 0.421479,
+        "blackjack_rate": 0.045278,
+        "bust_rate": 0.129455,
+        "surrender_rate": 0.051956,
+        "double_rate": 0.107253,
+        "split_rate": 0.024499,
+        "push_rate": 0.083738,
+        "loss_rate": 0.494783,
+        "elapsed_seconds": 1477.14
       }
     },
     {
@@ -119,22 +147,22 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck S17",
+      "config_label": "6-deck S17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.00373097,
-        "ev_percent": -0.3731,
-        "house_edge_percent": 0.3731,
-        "win_rate": 0.423977,
-        "blackjack_rate": 0.04523,
-        "bust_rate": 0.132343,
-        "surrender_rate": 0.044685,
-        "double_rate": 0.118892,
-        "split_rate": 0.024801,
-        "push_rate": 0.084955,
-        "loss_rate": 0.491068,
-        "elapsed_seconds": 1486.91
+        "ev_per_hand": -0.00352661,
+        "ev_percent": -0.3527,
+        "house_edge_percent": 0.3527,
+        "win_rate": 0.424103,
+        "blackjack_rate": 0.045226,
+        "bust_rate": 0.132255,
+        "surrender_rate": 0.04469,
+        "double_rate": 0.10271,
+        "split_rate": 0.024805,
+        "push_rate": 0.084936,
+        "loss_rate": 0.490961,
+        "elapsed_seconds": 1481.22
       }
     },
     {
@@ -147,22 +175,78 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": false,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.0057948,
-        "ev_percent": -0.5795,
-        "house_edge_percent": 0.5795,
-        "win_rate": 0.423209,
-        "blackjack_rate": 0.045286,
-        "bust_rate": 0.132253,
-        "surrender_rate": 0.044697,
-        "double_rate": 0.118952,
-        "split_rate": 0.024811,
-        "push_rate": 0.084424,
-        "loss_rate": 0.492367,
-        "elapsed_seconds": 1470.75
+        "ev_per_hand": -0.00553738,
+        "ev_percent": -0.5537,
+        "house_edge_percent": 0.5537,
+        "win_rate": 0.423339,
+        "blackjack_rate": 0.0453,
+        "bust_rate": 0.132292,
+        "surrender_rate": 0.044686,
+        "double_rate": 0.102726,
+        "split_rate": 0.024803,
+        "push_rate": 0.084416,
+        "loss_rate": 0.492245,
+        "elapsed_seconds": 1485.45
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_4to8deck_S17",
+      "strategy_name": "Basic Strategy (4-8 Deck, S17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck S17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01706577,
+        "ev_percent": -1.7066,
+        "house_edge_percent": 1.7066,
+        "win_rate": 0.424112,
+        "blackjack_rate": 0.045266,
+        "bust_rate": 0.132212,
+        "surrender_rate": 0.044716,
+        "double_rate": 0.102686,
+        "split_rate": 0.024802,
+        "push_rate": 0.084922,
+        "loss_rate": 0.490966,
+        "elapsed_seconds": 1485.5
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_4to8deck_S17",
+      "strategy_name": "Basic Strategy (4-8 Deck, S17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01950437,
+        "ev_percent": -1.9504,
+        "house_edge_percent": 1.9504,
+        "win_rate": 0.423192,
+        "blackjack_rate": 0.045252,
+        "bust_rate": 0.132306,
+        "surrender_rate": 0.044695,
+        "double_rate": 0.102718,
+        "split_rate": 0.024819,
+        "push_rate": 0.084414,
+        "loss_rate": 0.492393,
+        "elapsed_seconds": 1487.25
       }
     },
     {
@@ -175,22 +259,22 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "2-deck H17",
+      "config_label": "2-deck H17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.0041452,
-        "ev_percent": -0.4145,
-        "house_edge_percent": 0.4145,
-        "win_rate": 0.423451,
-        "blackjack_rate": 0.04559,
-        "bust_rate": 0.132305,
-        "surrender_rate": 0.047509,
-        "double_rate": 0.125953,
-        "split_rate": 0.023283,
-        "push_rate": 0.082863,
-        "loss_rate": 0.493686,
-        "elapsed_seconds": 1472.5
+        "ev_per_hand": -0.00433481,
+        "ev_percent": -0.4335,
+        "house_edge_percent": 0.4335,
+        "win_rate": 0.423368,
+        "blackjack_rate": 0.045578,
+        "bust_rate": 0.132319,
+        "surrender_rate": 0.047492,
+        "double_rate": 0.11101,
+        "split_rate": 0.02332,
+        "push_rate": 0.082894,
+        "loss_rate": 0.493738,
+        "elapsed_seconds": 1482.36
       }
     },
     {
@@ -203,22 +287,78 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": false,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.00573841,
-        "ev_percent": -0.5738,
-        "house_edge_percent": 0.5738,
-        "win_rate": 0.422571,
-        "blackjack_rate": 0.04526,
-        "bust_rate": 0.131988,
-        "surrender_rate": 0.047443,
-        "double_rate": 0.127554,
-        "split_rate": 0.025411,
-        "push_rate": 0.083987,
-        "loss_rate": 0.493442,
-        "elapsed_seconds": 1469.68
+        "ev_per_hand": -0.00551,
+        "ev_percent": -0.551,
+        "house_edge_percent": 0.551,
+        "win_rate": 0.422637,
+        "blackjack_rate": 0.045275,
+        "bust_rate": 0.131936,
+        "surrender_rate": 0.047418,
+        "double_rate": 0.11146,
+        "split_rate": 0.02537,
+        "push_rate": 0.084033,
+        "loss_rate": 0.49333,
+        "elapsed_seconds": 1482.42
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_double_deck_H17",
+      "strategy_name": "Basic Strategy (Double Deck, H17)",
+      "config": {
+        "num_decks": 2,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "2-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01795667,
+        "ev_percent": -1.7957,
+        "house_edge_percent": 1.7957,
+        "win_rate": 0.423379,
+        "blackjack_rate": 0.045598,
+        "bust_rate": 0.132317,
+        "surrender_rate": 0.047506,
+        "double_rate": 0.110949,
+        "split_rate": 0.023312,
+        "push_rate": 0.08289,
+        "loss_rate": 0.493732,
+        "elapsed_seconds": 1484.5
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_double_deck_H17",
+      "strategy_name": "Basic Strategy (Double Deck, H17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01917404,
+        "ev_percent": -1.9174,
+        "house_edge_percent": 1.9174,
+        "win_rate": 0.422617,
+        "blackjack_rate": 0.045276,
+        "bust_rate": 0.131926,
+        "surrender_rate": 0.047411,
+        "double_rate": 0.111487,
+        "split_rate": 0.025395,
+        "push_rate": 0.084022,
+        "loss_rate": 0.493361,
+        "elapsed_seconds": 1484.27
       }
     },
     {
@@ -231,22 +371,22 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "2-deck S17",
+      "config_label": "2-deck S17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.00220156,
-        "ev_percent": -0.2202,
-        "house_edge_percent": 0.2202,
-        "win_rate": 0.425766,
-        "blackjack_rate": 0.045569,
-        "bust_rate": 0.134583,
-        "surrender_rate": 0.040139,
-        "double_rate": 0.124438,
-        "split_rate": 0.023586,
-        "push_rate": 0.084116,
-        "loss_rate": 0.490118,
-        "elapsed_seconds": 1475.91
+        "ev_per_hand": -0.00241246,
+        "ev_percent": -0.2412,
+        "house_edge_percent": 0.2412,
+        "win_rate": 0.425729,
+        "blackjack_rate": 0.045546,
+        "bust_rate": 0.13454,
+        "surrender_rate": 0.040122,
+        "double_rate": 0.109043,
+        "split_rate": 0.023592,
+        "push_rate": 0.084105,
+        "loss_rate": 0.490166,
+        "elapsed_seconds": 1489.34
       }
     },
     {
@@ -259,22 +399,78 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": false,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.00574953,
-        "ev_percent": -0.575,
-        "house_edge_percent": 0.575,
-        "win_rate": 0.424212,
-        "blackjack_rate": 0.045264,
-        "bust_rate": 0.134187,
-        "surrender_rate": 0.040116,
-        "double_rate": 0.125971,
-        "split_rate": 0.025674,
-        "push_rate": 0.084701,
-        "loss_rate": 0.491088,
-        "elapsed_seconds": 1505.4
+        "ev_per_hand": -0.00574544,
+        "ev_percent": -0.5745,
+        "house_edge_percent": 0.5745,
+        "win_rate": 0.424214,
+        "blackjack_rate": 0.045285,
+        "bust_rate": 0.134272,
+        "surrender_rate": 0.040119,
+        "double_rate": 0.109465,
+        "split_rate": 0.025668,
+        "push_rate": 0.084688,
+        "loss_rate": 0.491098,
+        "elapsed_seconds": 1493.18
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_double_deck_S17",
+      "strategy_name": "Basic Strategy (Double Deck, S17)",
+      "config": {
+        "num_decks": 2,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "2-deck S17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01622264,
+        "ev_percent": -1.6223,
+        "house_edge_percent": 1.6223,
+        "win_rate": 0.425722,
+        "blackjack_rate": 0.045574,
+        "bust_rate": 0.134637,
+        "surrender_rate": 0.040101,
+        "double_rate": 0.109006,
+        "split_rate": 0.023573,
+        "push_rate": 0.084078,
+        "loss_rate": 0.4902,
+        "elapsed_seconds": 1490.07
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_double_deck_S17",
+      "strategy_name": "Basic Strategy (Double Deck, S17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01921611,
+        "ev_percent": -1.9216,
+        "house_edge_percent": 1.9216,
+        "win_rate": 0.424254,
+        "blackjack_rate": 0.045258,
+        "bust_rate": 0.134189,
+        "surrender_rate": 0.040143,
+        "double_rate": 0.109523,
+        "split_rate": 0.025678,
+        "push_rate": 0.084678,
+        "loss_rate": 0.491069,
+        "elapsed_seconds": 1488.7
       }
     },
     {
@@ -287,190 +483,386 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.0059044,
-        "ev_percent": -0.5904,
-        "house_edge_percent": 0.5904,
-        "win_rate": 0.421522,
-        "blackjack_rate": 0.045249,
-        "bust_rate": 0.129449,
-        "surrender_rate": 0.051959,
-        "double_rate": 0.123005,
-        "split_rate": 0.024475,
-        "push_rate": 0.08369,
-        "loss_rate": 0.494789,
-        "elapsed_seconds": 1502.78
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_s17",
-      "strategy_name": "Basic Strategy (S17, Surrender)",
-      "config": {
-        "num_decks": 6,
-        "dealer_hits_soft_17": false,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "6-deck S17",
-      "is_natural_config": true,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.0036897,
-        "ev_percent": -0.369,
-        "house_edge_percent": 0.369,
-        "win_rate": 0.424024,
-        "blackjack_rate": 0.045251,
-        "bust_rate": 0.132254,
-        "surrender_rate": 0.044644,
-        "double_rate": 0.118937,
-        "split_rate": 0.024827,
-        "push_rate": 0.084912,
-        "loss_rate": 0.491064,
-        "elapsed_seconds": 1522.83
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_s17",
-      "strategy_name": "Basic Strategy (S17, Surrender)",
-      "config": {
-        "num_decks": 6,
-        "dealer_hits_soft_17": true,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "6-deck H17",
-      "is_natural_config": false,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.00551878,
-        "ev_percent": -0.5519,
-        "house_edge_percent": 0.5519,
-        "win_rate": 0.423364,
-        "blackjack_rate": 0.045255,
-        "bust_rate": 0.132277,
-        "surrender_rate": 0.044663,
-        "double_rate": 0.118919,
-        "split_rate": 0.024823,
-        "push_rate": 0.084403,
-        "loss_rate": 0.492233,
-        "elapsed_seconds": 1535.98
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_single_deck_H17",
-      "strategy_name": "Basic Strategy (Single Deck, H17)",
-      "config": {
-        "num_decks": 1,
-        "dealer_hits_soft_17": true,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "1-deck H17",
-      "is_natural_config": true,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.00213827,
-        "ev_percent": -0.2138,
-        "house_edge_percent": 0.2138,
-        "win_rate": 0.428627,
-        "blackjack_rate": 0.046112,
-        "bust_rate": 0.143616,
-        "surrender_rate": 0.028797,
-        "double_rate": 0.129196,
-        "split_rate": 0.021365,
-        "push_rate": 0.082599,
-        "loss_rate": 0.488774,
-        "elapsed_seconds": 1535.29
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_single_deck_H17",
-      "strategy_name": "Basic Strategy (Single Deck, H17)",
-      "config": {
-        "num_decks": 6,
-        "dealer_hits_soft_17": true,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "6-deck H17",
-      "is_natural_config": false,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.00597873,
-        "ev_percent": -0.5979,
-        "house_edge_percent": 0.5979,
-        "win_rate": 0.426478,
-        "blackjack_rate": 0.045267,
-        "bust_rate": 0.142777,
-        "surrender_rate": 0.02885,
-        "double_rate": 0.133544,
-        "split_rate": 0.026859,
-        "push_rate": 0.085274,
-        "loss_rate": 0.488247,
-        "elapsed_seconds": 1528.27
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_single_deck_S17",
-      "strategy_name": "Basic Strategy (Single Deck, S17)",
-      "config": {
-        "num_decks": 1,
-        "dealer_hits_soft_17": false,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "1-deck S17",
-      "is_natural_config": true,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.00049862,
-        "ev_percent": -0.0499,
-        "house_edge_percent": 0.0499,
-        "win_rate": 0.425486,
-        "blackjack_rate": 0.046034,
-        "bust_rate": 0.131877,
-        "surrender_rate": 0.045394,
-        "double_rate": 0.128992,
-        "split_rate": 0.021108,
-        "push_rate": 0.082137,
-        "loss_rate": 0.492377,
-        "elapsed_seconds": 1523.4
-      }
-    },
-    {
-      "strategy_id": "basic_strategy_single_deck_S17",
-      "strategy_name": "Basic Strategy (Single Deck, S17)",
-      "config": {
-        "num_decks": 6,
-        "dealer_hits_soft_17": true,
-        "surrender_allowed": true,
-        "double_after_split": true,
-        "blackjack_payout": 1.5
-      },
-      "config_label": "6-deck H17",
-      "is_natural_config": false,
-      "results": {
-        "total_hands": 100000000,
-        "ev_per_hand": -0.00616703,
-        "ev_percent": -0.6167,
-        "house_edge_percent": 0.6167,
-        "win_rate": 0.422752,
+        "ev_per_hand": -0.00602397,
+        "ev_percent": -0.6024,
+        "house_edge_percent": 0.6024,
+        "win_rate": 0.42145,
         "blackjack_rate": 0.045237,
-        "bust_rate": 0.130839,
-        "surrender_rate": 0.045542,
-        "double_rate": 0.133186,
-        "split_rate": 0.026513,
-        "push_rate": 0.084274,
-        "loss_rate": 0.492974,
-        "elapsed_seconds": 1514.28
+        "bust_rate": 0.129441,
+        "surrender_rate": 0.05197,
+        "double_rate": 0.107238,
+        "split_rate": 0.02453,
+        "push_rate": 0.083689,
+        "loss_rate": 0.494862,
+        "elapsed_seconds": 1482.02
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_h17",
+      "strategy_name": "Basic Strategy (H17, Surrender)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01964424,
+        "ev_percent": -1.9644,
+        "house_edge_percent": 1.9644,
+        "win_rate": 0.421437,
+        "blackjack_rate": 0.045287,
+        "bust_rate": 0.129394,
+        "surrender_rate": 0.051979,
+        "double_rate": 0.107168,
+        "split_rate": 0.024492,
+        "push_rate": 0.083699,
+        "loss_rate": 0.494864,
+        "elapsed_seconds": 1479.58
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_s17",
+      "strategy_name": "Basic Strategy (S17, Surrender)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "6-deck S17 3:2",
+      "is_natural_config": true,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.00329683,
+        "ev_percent": -0.3297,
+        "house_edge_percent": 0.3297,
+        "win_rate": 0.424151,
+        "blackjack_rate": 0.045258,
+        "bust_rate": 0.132234,
+        "surrender_rate": 0.044676,
+        "double_rate": 0.102705,
+        "split_rate": 0.02478,
+        "push_rate": 0.084943,
+        "loss_rate": 0.490906,
+        "elapsed_seconds": 1481.03
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_s17",
+      "strategy_name": "Basic Strategy (S17, Surrender)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "6-deck H17 3:2",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.00591708,
+        "ev_percent": -0.5917,
+        "house_edge_percent": 0.5917,
+        "win_rate": 0.423165,
+        "blackjack_rate": 0.045263,
+        "bust_rate": 0.132342,
+        "surrender_rate": 0.044633,
+        "double_rate": 0.102687,
+        "split_rate": 0.024771,
+        "push_rate": 0.084405,
+        "loss_rate": 0.492431,
+        "elapsed_seconds": 1484.29
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_s17",
+      "strategy_name": "Basic Strategy (S17, Surrender)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck S17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01704491,
+        "ev_percent": -1.7045,
+        "house_edge_percent": 1.7045,
+        "win_rate": 0.42412,
+        "blackjack_rate": 0.045235,
+        "bust_rate": 0.13218,
+        "surrender_rate": 0.044678,
+        "double_rate": 0.102679,
+        "split_rate": 0.024798,
+        "push_rate": 0.084966,
+        "loss_rate": 0.490915,
+        "elapsed_seconds": 1481.86
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_s17",
+      "strategy_name": "Basic Strategy (S17, Surrender)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01928569,
+        "ev_percent": -1.9286,
+        "house_edge_percent": 1.9286,
+        "win_rate": 0.42326,
+        "blackjack_rate": 0.045263,
+        "bust_rate": 0.132216,
+        "surrender_rate": 0.044694,
+        "double_rate": 0.102701,
+        "split_rate": 0.024802,
+        "push_rate": 0.084445,
+        "loss_rate": 0.492294,
+        "elapsed_seconds": 1486.63
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_H17",
+      "strategy_name": "Basic Strategy (Single Deck, H17)",
+      "config": {
+        "num_decks": 1,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "1-deck H17 3:2",
+      "is_natural_config": true,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.0019898,
+        "ev_percent": -0.199,
+        "house_edge_percent": 0.199,
+        "win_rate": 0.428674,
+        "blackjack_rate": 0.046091,
+        "bust_rate": 0.143562,
+        "surrender_rate": 0.028797,
+        "double_rate": 0.11534,
+        "split_rate": 0.021349,
+        "push_rate": 0.082601,
+        "loss_rate": 0.488725,
+        "elapsed_seconds": 1491.75
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_H17",
+      "strategy_name": "Basic Strategy (Single Deck, H17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "6-deck H17 3:2",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.00587417,
+        "ev_percent": -0.5874,
+        "house_edge_percent": 0.5874,
+        "win_rate": 0.426576,
+        "blackjack_rate": 0.045267,
+        "bust_rate": 0.142751,
+        "surrender_rate": 0.028837,
+        "double_rate": 0.116753,
+        "split_rate": 0.026823,
+        "push_rate": 0.085223,
+        "loss_rate": 0.488201,
+        "elapsed_seconds": 1493.6
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_H17",
+      "strategy_name": "Basic Strategy (Single Deck, H17)",
+      "config": {
+        "num_decks": 1,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "1-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01603321,
+        "ev_percent": -1.6033,
+        "house_edge_percent": 1.6033,
+        "win_rate": 0.428569,
+        "blackjack_rate": 0.046096,
+        "bust_rate": 0.143564,
+        "surrender_rate": 0.028805,
+        "double_rate": 0.115319,
+        "split_rate": 0.021377,
+        "push_rate": 0.082596,
+        "loss_rate": 0.488835,
+        "elapsed_seconds": 1491.14
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_H17",
+      "strategy_name": "Basic Strategy (Single Deck, H17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01952875,
+        "ev_percent": -1.9529,
+        "house_edge_percent": 1.9529,
+        "win_rate": 0.426496,
+        "blackjack_rate": 0.045274,
+        "bust_rate": 0.142775,
+        "surrender_rate": 0.028872,
+        "double_rate": 0.116764,
+        "split_rate": 0.026855,
+        "push_rate": 0.085211,
+        "loss_rate": 0.488293,
+        "elapsed_seconds": 1491.37
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_S17",
+      "strategy_name": "Basic Strategy (Single Deck, S17)",
+      "config": {
+        "num_decks": 1,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "1-deck S17 3:2",
+      "is_natural_config": true,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.00034443,
+        "ev_percent": -0.0344,
+        "house_edge_percent": 0.0344,
+        "win_rate": 0.425526,
+        "blackjack_rate": 0.046029,
+        "bust_rate": 0.131838,
+        "surrender_rate": 0.045403,
+        "double_rate": 0.11532,
+        "split_rate": 0.021129,
+        "push_rate": 0.082174,
+        "loss_rate": 0.492301,
+        "elapsed_seconds": 1479.06
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_S17",
+      "strategy_name": "Basic Strategy (Single Deck, S17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.5
+      },
+      "config_label": "6-deck H17 3:2",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.00611687,
+        "ev_percent": -0.6117,
+        "house_edge_percent": 0.6117,
+        "win_rate": 0.422713,
+        "blackjack_rate": 0.045238,
+        "bust_rate": 0.130876,
+        "surrender_rate": 0.045541,
+        "double_rate": 0.11673,
+        "split_rate": 0.026534,
+        "push_rate": 0.084324,
+        "loss_rate": 0.492963,
+        "elapsed_seconds": 1483.06
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_S17",
+      "strategy_name": "Basic Strategy (Single Deck, S17)",
+      "config": {
+        "num_decks": 1,
+        "dealer_hits_soft_17": false,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "1-deck S17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01425877,
+        "ev_percent": -1.4259,
+        "house_edge_percent": 1.4259,
+        "win_rate": 0.425511,
+        "blackjack_rate": 0.046043,
+        "bust_rate": 0.131833,
+        "surrender_rate": 0.045396,
+        "double_rate": 0.11528,
+        "split_rate": 0.021092,
+        "push_rate": 0.082148,
+        "loss_rate": 0.492341,
+        "elapsed_seconds": 1477.46
+      }
+    },
+    {
+      "strategy_id": "basic_strategy_single_deck_S17",
+      "strategy_name": "Basic Strategy (Single Deck, S17)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.01964329,
+        "ev_percent": -1.9643,
+        "house_edge_percent": 1.9643,
+        "win_rate": 0.422722,
+        "blackjack_rate": 0.045252,
+        "bust_rate": 0.130773,
+        "surrender_rate": 0.045548,
+        "double_rate": 0.116677,
+        "split_rate": 0.026538,
+        "push_rate": 0.084383,
+        "loss_rate": 0.492895,
+        "elapsed_seconds": 1483.54
       }
     },
     {
@@ -483,22 +875,50 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.05899466,
-        "ev_percent": -5.8995,
-        "house_edge_percent": 5.8995,
-        "win_rate": 0.410891,
-        "blackjack_rate": 0.045237,
-        "bust_rate": 0.272183,
+        "ev_per_hand": -0.05906468,
+        "ev_percent": -5.9065,
+        "house_edge_percent": 5.9065,
+        "win_rate": 0.410886,
+        "blackjack_rate": 0.045249,
+        "bust_rate": 0.272168,
         "surrender_rate": 0.0,
         "double_rate": 0.0,
         "split_rate": 0.0,
-        "push_rate": 0.096604,
-        "loss_rate": 0.492505,
-        "elapsed_seconds": 1564.68
+        "push_rate": 0.096539,
+        "loss_rate": 0.492575,
+        "elapsed_seconds": 1533.76
+      }
+    },
+    {
+      "strategy_id": "mimic_the_dealer",
+      "strategy_name": "Mimic the Dealer",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.0725735,
+        "ev_percent": -7.2574,
+        "house_edge_percent": 7.2574,
+        "win_rate": 0.410902,
+        "blackjack_rate": 0.045235,
+        "bust_rate": 0.272133,
+        "surrender_rate": 0.0,
+        "double_rate": 0.0,
+        "split_rate": 0.0,
+        "push_rate": 0.096576,
+        "loss_rate": 0.492522,
+        "elapsed_seconds": 1533.89
       }
     },
     {
@@ -511,22 +931,50 @@
         "double_after_split": true,
         "blackjack_payout": 1.5
       },
-      "config_label": "6-deck H17",
+      "config_label": "6-deck H17 3:2",
       "is_natural_config": true,
       "results": {
         "total_hands": 100000000,
-        "ev_per_hand": -0.06402914,
-        "ev_percent": -6.4029,
-        "house_edge_percent": 6.4029,
-        "win_rate": 0.424439,
-        "blackjack_rate": 0.045255,
+        "ev_per_hand": -0.06400457,
+        "ev_percent": -6.4005,
+        "house_edge_percent": 6.4005,
+        "win_rate": 0.424422,
+        "blackjack_rate": 0.045273,
         "bust_rate": 0.0,
         "surrender_rate": 0.0,
         "double_rate": 0.0,
         "split_rate": 0.0,
-        "push_rate": 0.064465,
-        "loss_rate": 0.511096,
-        "elapsed_seconds": 1444.96
+        "push_rate": 0.064515,
+        "loss_rate": 0.511063,
+        "elapsed_seconds": 1415.33
+      }
+    },
+    {
+      "strategy_id": "never_bust",
+      "strategy_name": "Never Bust (Toy Strategy)",
+      "config": {
+        "num_decks": 6,
+        "dealer_hits_soft_17": true,
+        "surrender_allowed": true,
+        "double_after_split": true,
+        "blackjack_payout": 1.2
+      },
+      "config_label": "6-deck H17 6:5",
+      "is_natural_config": false,
+      "results": {
+        "total_hands": 100000000,
+        "ev_per_hand": -0.0775103,
+        "ev_percent": -7.751,
+        "house_edge_percent": 7.751,
+        "win_rate": 0.424498,
+        "blackjack_rate": 0.045244,
+        "bust_rate": 0.0,
+        "surrender_rate": 0.0,
+        "double_rate": 0.0,
+        "split_rate": 0.0,
+        "push_rate": 0.064446,
+        "loss_rate": 0.511057,
+        "elapsed_seconds": 1413.98
       }
     }
   ]

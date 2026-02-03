@@ -52,3 +52,9 @@ htmlcov/
 
 # Distribution
 *.whl
+
+# Simulation logs
+*.log
+
+# Claude Code
+.claude/
