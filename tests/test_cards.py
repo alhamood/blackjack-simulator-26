@@ -47,6 +47,18 @@ class TestCard(unittest.TestCase):
         card = Card('A', '♠')
         self.assertEqual(repr(card), 'A♠')
 
+    def test_hi_lo_values(self):
+        """Test Hi-Lo count values for all ranks."""
+        # Low cards (2-6): +1
+        for rank in ['2', '3', '4', '5', '6']:
+            self.assertEqual(Card(rank, '♠').hi_lo_value(), 1)
+        # Neutral cards (7-9): 0
+        for rank in ['7', '8', '9']:
+            self.assertEqual(Card(rank, '♠').hi_lo_value(), 0)
+        # High cards (10-A): -1
+        for rank in ['10', 'J', 'Q', 'K', 'A']:
+            self.assertEqual(Card(rank, '♠').hi_lo_value(), -1)
+
 
 class TestDeck(unittest.TestCase):
     """Test cases for Deck class."""
@@ -176,6 +188,90 @@ class TestShoe(unittest.TestCase):
 
         infinite_shoe = Shoe(num_decks=6, infinite=True)
         self.assertIn("infinite", repr(infinite_shoe))
+
+    def test_running_count_initialization(self):
+        """Test that running count starts at zero."""
+        shoe = Shoe(num_decks=6)
+        self.assertEqual(shoe.running_count, 0)
+
+    def test_running_count_updated_on_deal(self):
+        """Test that running count is updated when cards are dealt."""
+        shoe = Shoe(num_decks=1, penetration=1.0)
+        initial_count = shoe.running_count
+
+        # Deal cards and verify count changes
+        card = shoe.deal_card()
+        expected_count = initial_count + card.hi_lo_value()
+        self.assertEqual(shoe.running_count, expected_count)
+
+    def test_running_count_resets_on_shuffle(self):
+        """Test that running count resets to zero on shuffle."""
+        shoe = Shoe(num_decks=1, penetration=1.0)
+
+        # Deal some cards to build up count
+        for _ in range(10):
+            shoe.deal_card()
+
+        # Shuffle and check count is reset
+        shoe.shuffle()
+        self.assertEqual(shoe.running_count, 0)
+
+    def test_running_count_resets_on_rebuild(self):
+        """Test that running count resets when shoe rebuilds at penetration."""
+        shoe = Shoe(num_decks=1, penetration=0.5)
+
+        # Deal past penetration to trigger rebuild
+        cards_to_deal = int(52 * 0.5) + 1
+        for _ in range(cards_to_deal):
+            shoe.deal_card()
+
+        # After rebuild, only one card dealt so count should reflect just that card
+        # (cards_dealt should be 1, count should be hi_lo_value of that one card)
+        self.assertEqual(shoe.cards_dealt, 1)
+        # Count should be small (just one card's value)
+        self.assertIn(shoe.running_count, [-1, 0, 1])
+
+    def test_true_count_calculation(self):
+        """Test true count is running count divided by decks remaining."""
+        shoe = Shoe(num_decks=2, penetration=1.0)
+
+        # Manually set running count for testing
+        shoe.running_count = 8
+
+        # With 104 cards (2 decks), true count should be 8 / 2 = 4
+        self.assertAlmostEqual(shoe.true_count, 4.0, places=1)
+
+        # Deal half the shoe (52 cards)
+        for _ in range(52):
+            shoe.deal_card()
+
+        # Now ~1 deck remaining, recalculate
+        decks_remaining = shoe.decks_remaining()
+        expected_tc = shoe.running_count / decks_remaining
+        self.assertAlmostEqual(shoe.true_count, expected_tc, places=1)
+
+    def test_decks_remaining(self):
+        """Test decks_remaining calculation."""
+        shoe = Shoe(num_decks=2, penetration=1.0)
+        self.assertAlmostEqual(shoe.decks_remaining(), 2.0, places=1)
+
+        # Deal 52 cards (1 deck)
+        for _ in range(52):
+            shoe.deal_card()
+
+        self.assertAlmostEqual(shoe.decks_remaining(), 1.0, places=1)
+
+    def test_infinite_shoe_no_count_tracking(self):
+        """Test that infinite shoe returns 0 for true count."""
+        shoe = Shoe(num_decks=6, infinite=True)
+
+        # Deal many cards
+        for _ in range(100):
+            shoe.deal_card()
+
+        # True count should always be 0 for infinite shoe
+        self.assertEqual(shoe.true_count, 0.0)
+        self.assertEqual(shoe.decks_remaining(), float('inf'))
 
 
 if __name__ == '__main__':

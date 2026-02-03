@@ -11,8 +11,9 @@ from src.betting import (
     BettingStrategy, FlatBetting, MartingaleBetting,
     ReverseMartingaleBetting, Sequence1326Betting,
     ParoliBetting, DAlembertBetting, FibonacciBetting,
-    STRATEGY_REGISTRY,
+    HiLoCountingBetting, STRATEGY_REGISTRY,
 )
+from src.cards import Shoe
 
 
 class TestFlatBetting(unittest.TestCase):
@@ -196,6 +197,81 @@ class TestFibonacciBetting(unittest.TestCase):
         self.assertEqual(s.get_bet(), 1.0)  # Can't go below 0
 
 
+class TestHiLoCountingBetting(unittest.TestCase):
+    """Test Hi-Lo card counting betting strategy."""
+
+    def test_flat_bet_without_shoe(self):
+        """Test that strategy bets flat when no shoe is set."""
+        s = HiLoCountingBetting(base_unit=10.0)
+        self.assertEqual(s.get_bet(), 10.0)
+
+    def test_flat_bet_with_infinite_shoe(self):
+        """Test that strategy bets flat with infinite shoe."""
+        s = HiLoCountingBetting(base_unit=10.0)
+        shoe = Shoe(num_decks=6, infinite=True)
+        s.set_shoe(shoe)
+        self.assertEqual(s.get_bet(), 10.0)
+
+    def test_bet_spread_based_on_true_count(self):
+        """Test that bet increases with true count."""
+        s = HiLoCountingBetting(base_unit=10.0, spread={1: 1, 2: 2, 3: 4, 4: 8})
+        shoe = Shoe(num_decks=6, penetration=1.0)
+        s.set_shoe(shoe)
+
+        # At TC=0, should bet 1 unit (threshold 1 not reached)
+        shoe.running_count = 0
+        # TC = 0 / 6 = 0, below threshold 1
+        self.assertEqual(s.get_bet(), 10.0)
+
+        # At TC=1, should bet 1 unit
+        shoe.running_count = 6  # TC = 6/6 = 1
+        self.assertEqual(s.get_bet(), 10.0)
+
+        # At TC=2, should bet 2 units
+        shoe.running_count = 12  # TC = 12/6 = 2
+        self.assertEqual(s.get_bet(), 20.0)
+
+        # At TC=3, should bet 4 units
+        shoe.running_count = 18  # TC = 18/6 = 3
+        self.assertEqual(s.get_bet(), 40.0)
+
+        # At TC=4+, should bet 8 units
+        shoe.running_count = 24  # TC = 24/6 = 4
+        self.assertEqual(s.get_bet(), 80.0)
+
+    def test_max_bet_cap(self):
+        """Test that bet is capped at max_bet."""
+        s = HiLoCountingBetting(base_unit=100.0, max_bet=500.0, spread={1: 1, 4: 8})
+        shoe = Shoe(num_decks=6, penetration=1.0)
+        s.set_shoe(shoe)
+
+        # TC=4 would give 8 * 100 = 800, but capped at 500
+        shoe.running_count = 24  # TC = 4
+        self.assertEqual(s.get_bet(), 500.0)
+
+    def test_negative_true_count(self):
+        """Test that negative true count gives minimum bet."""
+        s = HiLoCountingBetting(base_unit=10.0, spread={1: 1, 2: 2, 3: 4, 4: 8})
+        shoe = Shoe(num_decks=6, penetration=1.0)
+        s.set_shoe(shoe)
+
+        # Negative count (player disadvantage)
+        shoe.running_count = -12  # TC = -2
+        self.assertEqual(s.get_bet(), 10.0)
+
+    def test_custom_spread(self):
+        """Test with a custom conservative spread."""
+        s = HiLoCountingBetting(base_unit=5.0, spread={1: 1, 2: 2, 3: 3, 4: 4})
+        shoe = Shoe(num_decks=6, penetration=1.0)
+        s.set_shoe(shoe)
+
+        shoe.running_count = 18  # TC = 3
+        self.assertEqual(s.get_bet(), 15.0)  # 3 * 5
+
+        shoe.running_count = 30  # TC = 5
+        self.assertEqual(s.get_bet(), 20.0)  # 4 * 5 (max spread level)
+
+
 class TestFromJson(unittest.TestCase):
     """Test loading strategies from JSON config files."""
 
@@ -229,7 +305,7 @@ class TestStrategyRegistry(unittest.TestCase):
 
     def test_all_types_registered(self):
         expected = ['flat', 'martingale', 'reverse_martingale', '1-3-2-6',
-                     'paroli', 'dalembert', 'fibonacci']
+                     'paroli', 'dalembert', 'fibonacci', 'hi_lo']
         for key in expected:
             self.assertIn(key, STRATEGY_REGISTRY)
 

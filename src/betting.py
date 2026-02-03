@@ -189,6 +189,67 @@ class FibonacciBetting(BettingStrategy):
         self._position = 0
 
 
+class HiLoCountingBetting(BettingStrategy):
+    """
+    Hi-Lo card counting bet spread strategy.
+
+    Adjusts bet size based on the true count. Higher true counts indicate
+    a player advantage, warranting larger bets.
+    """
+
+    # Default spread: TC -> units multiplier
+    DEFAULT_SPREAD = {
+        1: 1,   # TC <= 1: 1 unit
+        2: 2,   # TC = 2: 2 units
+        3: 4,   # TC = 3: 4 units
+        4: 8,   # TC >= 4: 8 units
+    }
+
+    def __init__(
+        self,
+        base_unit: float = 1.0,
+        max_bet: float = 1000.0,
+        spread: Optional[dict] = None,
+    ):
+        """
+        Initialize Hi-Lo counting strategy.
+
+        Args:
+            base_unit: Base betting unit
+            max_bet: Maximum allowed bet
+            spread: Dict mapping true count thresholds to unit multipliers.
+                    Keys should be integers; bet is determined by the highest
+                    key <= true_count. Default: {1: 1, 2: 2, 3: 4, 4: 8}
+        """
+        super().__init__(base_unit, max_bet)
+        self._spread = spread if spread is not None else self.DEFAULT_SPREAD.copy()
+        self._spread_thresholds = sorted(self._spread.keys())
+        self._shoe = None
+
+    def set_shoe(self, shoe):
+        """Set the shoe reference for count access."""
+        self._shoe = shoe
+
+    def get_bet(self) -> float:
+        if self._shoe is None or self._shoe.infinite:
+            # No shoe or infinite deck: flat bet
+            return self.base_unit
+
+        tc = self._shoe.true_count
+        # Find the highest threshold <= true count
+        units = 1
+        for threshold in self._spread_thresholds:
+            if tc >= threshold:
+                units = self._spread[threshold]
+            else:
+                break
+
+        return min(self.base_unit * units, self.max_bet)
+
+    def reset(self):
+        pass  # No state to reset (count is in the shoe)
+
+
 # Registry mapping type strings to classes
 STRATEGY_REGISTRY = {
     'flat': FlatBetting,
@@ -198,4 +259,5 @@ STRATEGY_REGISTRY = {
     'paroli': ParoliBetting,
     'dalembert': DAlembertBetting,
     'fibonacci': FibonacciBetting,
+    'hi_lo': HiLoCountingBetting,
 }

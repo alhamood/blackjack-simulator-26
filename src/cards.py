@@ -20,10 +20,16 @@ class Card:
         '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
         '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11,
     }
+    # Hi-Lo count values: 2-6 = +1, 7-9 = 0, 10-A = -1
+    _HI_LO_VALUES = {
+        '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
+        '7': 0, '8': 0, '9': 0,
+        '10': -1, 'J': -1, 'Q': -1, 'K': -1, 'A': -1,
+    }
     _VALID_RANKS = frozenset(RANKS)
     _VALID_SUITS = frozenset(SUITS)
 
-    __slots__ = ('rank', 'suit', '_value', 'is_ace')
+    __slots__ = ('rank', 'suit', '_value', '_hi_lo_value', 'is_ace')
 
     def __init__(self, rank: str, suit: str):
         """
@@ -41,6 +47,7 @@ class Card:
         self.rank = rank
         self.suit = suit
         self._value = self._RANK_VALUES[rank]
+        self._hi_lo_value = self._HI_LO_VALUES[rank]
         self.is_ace = rank == 'A'
 
     def value(self) -> int:
@@ -51,6 +58,15 @@ class Card:
             Card value (2-10 for number cards, 10 for face cards, 11 for Ace)
         """
         return self._value
+
+    def hi_lo_value(self) -> int:
+        """
+        Get the Hi-Lo count value of the card.
+
+        Returns:
+            +1 for 2-6, 0 for 7-9, -1 for 10-A
+        """
+        return self._hi_lo_value
 
     def __repr__(self) -> str:
         """String representation of the card."""
@@ -129,6 +145,7 @@ class Shoe:
         self.cards: List[Card] = self._master_cards.copy()
         self._deck_template: List[Card] = self._master_cards  # For infinite mode
         self.cards_dealt = 0
+        self.running_count = 0  # Hi-Lo running count
 
         self.shuffle()
 
@@ -136,6 +153,7 @@ class Shoe:
         """Reset the shoe by copying master cards and shuffling."""
         self.cards = self._master_cards.copy()
         self.cards_dealt = 0
+        self.running_count = 0
         random.shuffle(self.cards)
 
     def shuffle(self):
@@ -143,6 +161,7 @@ class Shoe:
         if not self.infinite:
             random.shuffle(self.cards)
         self.cards_dealt = 0
+        self.running_count = 0
 
     def deal_card(self) -> Card:
         """
@@ -156,7 +175,9 @@ class Shoe:
         """
         if self.infinite:
             # Infinite deck: sample with replacement from template
-            return random.choice(self._deck_template)
+            card = random.choice(self._deck_template)
+            # Don't track count for infinite deck (meaningless)
+            return card
         else:
             # Check if we need to reshuffle before dealing
             if self.cards_dealt >= self._shuffle_threshold:
@@ -164,6 +185,7 @@ class Shoe:
 
             card = self.cards.pop()
             self.cards_dealt += 1
+            self.running_count += card.hi_lo_value()
 
             return card
 
@@ -189,6 +211,32 @@ class Shoe:
         if self.infinite:
             return float('inf')
         return len(self.cards)
+
+    def decks_remaining(self) -> float:
+        """
+        Get the estimated number of decks remaining in the shoe.
+
+        Returns:
+            Number of decks left (infinite for infinite mode)
+        """
+        if self.infinite:
+            return float('inf')
+        return len(self.cards) / 52.0
+
+    @property
+    def true_count(self) -> float:
+        """
+        Get the true count (running count / decks remaining).
+
+        Returns:
+            True count (0.0 for infinite mode)
+        """
+        if self.infinite:
+            return 0.0
+        decks = self.decks_remaining()
+        if decks <= 0:
+            return 0.0
+        return self.running_count / decks
 
     def __repr__(self) -> str:
         """String representation of the shoe."""
